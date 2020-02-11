@@ -32,4 +32,5 @@ jobs:
       - name: Run tests
         env:
           THEMIS_VIM: ${{ steps.vim.outputs.executable }}
+          THEMIS_HOME: ./vim-themis
         run: make test
