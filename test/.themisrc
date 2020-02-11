@@ -1,0 +1,132 @@
+
+call themis#option('recursive', 1)
+
+let s:root = getcwd()
+
+let s:prompt_name = 'test_prompt'
+let $PS1 = printf('[%s]', s:prompt_name)
+
+function! FlomptTestHelper() abort
+    let helper = {
+        \ 'assert': s:assert(),
+    \ }
+
+    function! helper.before_each() abort
+        execute 'cd' s:root
+
+        call flompt#logger#set_func({ msg -> themis#log(msg) })
+        call themis#log('')
+
+        filetype on
+        syntax enable
+    endfunction
+
+    function! helper.after_each() abort
+        if exists('b:terminal_job_id')
+            call jobstop(b:terminal_job_id)
+        endif
+        silent! %bwipeout!
+        execute 'cd' s:root
+
+        filetype off
+        syntax off
+    endfunction
+
+    function! helper.suite(name) abort
+        let suite = themis#suite(a:name)
+        let suite.before_each = self.before_each
+        let suite.after_each = self.after_each
+        return suite
+    endfunction
+
+    function! helper.input(texts) abort
+        call nvim_put(a:texts, 'c', v:true, v:true)
+    endfunction
+
+    function! helper.buffer_log() abort
+        let lines = getbufline('%', 1, '$')
+        for line in lines
+            call themis#log('[buffer] ' . line)
+        endfor
+    endfunction
+
+    function! helper.search(pattern) abort
+        let result = search(a:pattern)
+        if result == 0
+            let message = printf('%s not found', a:pattern)
+            call self.assert.fail(message)
+        endif
+        return result
+    endfunction
+
+    function! helper.open_terminal_sync() abort
+        let channel_id = termopen(['bash', '--norc'], {
+            \ 'on_stdout': function('s:on_stdout'),
+            \ 'stdout_buffered': v:true,
+        \ })
+        call self.wait_terminal(channel_id)
+        return channel_id
+    endfunction
+
+    function! helper.wait_terminal(channel_id) abort
+        " HACk: How to wait terminal drawing?
+        sleep 100m
+    endfunction
+
+    return helper
+endfunction
+
+function! s:on_stdout(id, data, event) abort
+    call themis#log('[stdout] ' . string(a:data))
+endfunction
+
+function! s:assert() abort
+    let assert = themis#helper('assert')
+
+    function! assert.window_count(count) abort
+        let window_count = tabpagewinnr(tabpagenr(), '$')
+        let message = printf('window count must be %s, but actual: %s', a:count, window_count)
+        call self.equals(window_count, a:count, message)
+    endfunction
+
+    function! assert._search_last_prompt() abort
+        normal! G
+        let result = search(s:prompt_name, 'bW')
+        if result == 0
+            let message = printf('not found prompt: %s', s:prompt_name)
+            call self.assert.fail(message)
+        endif
+        return result
+    endfunction
+
+    function! assert.terminal() abort
+        let actual = &buftype
+        let expected = 'terminal'
+        call self.equals(actual, expected, '&buftype should be terminal')
+    endfunction
+
+    function! assert.prompt(expected) abort
+        call self.terminal()
+        call self._search_last_prompt()
+        let actual = getline(line('.'))[len($PS1):]
+        let message = printf('current prompt should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
+    function! assert.command_result_line(expected) abort
+        call self.terminal()
+        call self._search_last_prompt()
+        normal! k
+        let actual = getline(line('.'))
+        let message = printf('command result line should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
+    function! assert.line_number(expected) abort
+        let actual = line('.')
+        let message = printf('line_number should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
+    return assert
+endfunction

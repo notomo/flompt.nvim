@@ -1,0 +1,33 @@
+*flompt.nvim.txt*
+
+==============================================================================
+COMMANDS                                                *flompt.nvim-commands*
+
+:Flompt                                                              *:Flompt*
+  Open a floating window for terminal command input.
+>
+  :Flompt " open a window for input
+  :Flompt send " send line under the cursor to terminal
+  :Flompt close " close the window
+<
+
+==============================================================================
+EXAMPLES                                                *flompt.nvim-examples*
+
+>
+  nnoremap <Leader>f <Cmd>Flompt<CR>
+
+  augroup flompt
+      autocmd!
+      autocmd FileType flompt call s:settings()
+  augroup END
+
+  function! s:settings() abort
+      inoremap <buffer> <CR> <Cmd>Flompt send<CR>
+      nnoremap <buffer> <CR> <Cmd>Flompt send<CR>
+      nnoremap <buffer> q <Cmd>Flompt close<CR>
+  endfunction
+<
+
+==============================================================================
+vim:tw=78:ts=8:ft=help
