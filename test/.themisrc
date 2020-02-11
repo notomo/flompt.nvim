@@ -94,7 +94,7 @@ function! s:assert() abort
         let result = search(s:prompt_name, 'bW')
         if result == 0
             let message = printf('not found prompt: %s', s:prompt_name)
-            call self.assert.fail(message)
+            call self.fail(message)
         endif
         return result
     endfunction
