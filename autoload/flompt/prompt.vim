@@ -12,7 +12,7 @@ function! flompt#prompt#get_or_create() abort
         return s:source_buf_prompts[source_bufnr]
     endif
 
-    let buffer = flompt#buffer#new(source_bufnr)
+    let buffer = flompt#buffer#new(source_bufnr, expand('%:t'))
     let prompt = {
         \ 'buffer': buffer,
         \ 'window': flompt#window#new(buffer.bufnr),

@@ -1,9 +1,10 @@
 
-function! flompt#buffer#new(source_bufnr) abort
+function! flompt#buffer#new(source_bufnr, source_cmd) abort
     let bufnr = nvim_create_buf(v:false, v:true)
     let buffer = {
         \ 'bufnr': bufnr,
         \ 'source_bufnr': a:source_bufnr,
+        \ 'source_cmd': a:source_cmd,
         \ 'logger': flompt#logger#new('buffer'),
     \ }
 
@@ -16,11 +17,15 @@ function! flompt#buffer#new(source_bufnr) abort
             return
         endif
 
-        let lines = getbufline(self.bufnr, a:cursor_line) + ['']
-        let sent = chansend(job_id, lines)
-        if sent == 0
-            throw printf('faield to chansend(%s, %s)', job_id, lines)
+        let lines = getbufline(self.bufnr, a:cursor_line) + self._new_line()
+        call chansend(job_id, lines)
+    endfunction
+
+    function! buffer._new_line() abort
+        if self.source_cmd ==? 'cmd.exe'
+            return ["\r"]
         endif
+        return ['']
     endfunction
 
     function! buffer.append() abort

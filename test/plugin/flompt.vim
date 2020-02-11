@@ -5,6 +5,7 @@ let s:assert = s:helper.assert
 
 function! s:suite.open_and_send()
     let channel_id = s:helper.open_terminal_sync()
+    call s:helper.buffer_log()
 
     Flompt
     call s:assert.window_count(2)
