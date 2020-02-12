@@ -3,6 +3,7 @@ call themis#option('recursive', 1)
 
 let s:root = getcwd()
 
+set shell=bash
 let s:prompt_name = 'test_prompt'
 let $PS1 = printf('[%s]', s:prompt_name)
 
@@ -60,9 +61,10 @@ function! FlomptTestHelper() abort
     endfunction
 
     function! helper.open_terminal_sync() abort
-        let channel_id = termopen(['bash', '--norc'], {
+        let channel_id = termopen(['bash', '--noprofile', '--norc', '-eo', 'pipefail'], {
             \ 'on_stdout': function('s:on_stdout'),
-            \ 'stdout_buffered': v:true,
+            \ 'on_stderr': function('s:on_stderr'),
+            \ 'on_exit': function('s:on_exit'),
         \ })
         call self.wait_terminal(channel_id)
         return channel_id
@@ -70,7 +72,7 @@ function! FlomptTestHelper() abort
 
     function! helper.wait_terminal(channel_id) abort
         " HACk: How to wait terminal drawing?
-        sleep 100m
+        sleep 300m
     endfunction
 
     return helper
@@ -78,6 +80,14 @@ endfunction
 
 function! s:on_stdout(id, data, event) abort
     call themis#log('[stdout] ' . string(a:data))
+endfunction
+
+function! s:on_stderr(id, data, event) abort
+    call themis#log('[stderr] ' . string(a:data))
+endfunction
+
+function! s:on_exit(id, exit_code, event) abort
+    call themis#log('[exit] exit_code: ' . a:exit_code)
 endfunction
 
 function! s:assert() abort

@@ -30,6 +30,7 @@ jobs:
           version: nightly
 
       - name: Run tests
+        shell: bash
         env:
           THEMIS_VIM: ${{ steps.vim.outputs.executable }}
           THEMIS_HOME: ./vim-themis
