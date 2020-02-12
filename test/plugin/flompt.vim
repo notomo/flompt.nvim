@@ -58,3 +58,17 @@ function! s:suite.nop_logger()
 
     Flompt send
 endfunction
+
+function! s:suite.cannot_send_to_already_exited_terminal()
+    let channel_id = s:helper.open_terminal_sync()
+
+    Flompt
+
+    call s:helper.input(['exit'])
+    Flompt send
+    call s:helper.wait_terminal(channel_id)
+
+    call s:helper.input(['echo 123'])
+    Flompt send
+    call s:helper.wait_terminal(channel_id)
+endfunction

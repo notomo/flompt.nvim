@@ -12,13 +12,18 @@ function! flompt#buffer#new(source_bufnr, source_cmd) abort
     call nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
 
     function! buffer.send_contents(cursor_line) abort
-        let job_id = getbufvar(self.source_bufnr, 'terminal_job_id', v:null)
-        if empty(job_id)
+        let id = nvim_buf_get_option(self.source_bufnr, 'channel')
+        if empty(id)
+            return
+        endif
+
+        let running = jobwait([id], 0)[0] == -1
+        if !running
             return
         endif
 
         let lines = getbufline(self.bufnr, a:cursor_line) + self._new_line()
-        call chansend(job_id, lines)
+        call chansend(id, lines)
     endfunction
 
     function! buffer._new_line() abort
