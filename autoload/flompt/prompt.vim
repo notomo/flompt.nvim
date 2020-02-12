@@ -29,6 +29,7 @@ function! flompt#prompt#get_or_create() abort
     endfunction
 
     function! prompt.send() abort
+        call self.window.open()
         let cursor_line = self.window.cursor_line()
         call self.buffer.send_contents(cursor_line)
 
@@ -42,6 +43,7 @@ function! flompt#prompt#get_or_create() abort
     execute printf('autocmd BufWipeout <buffer=%s> call s:on_wipe_bufnr("%s")', buffer.bufnr, buffer.bufnr)
     let s:source_buf_prompts[source_bufnr] = prompt
     execute printf('autocmd BufWipeout <buffer=%s> call s:on_wipe_source_bufnr("%s")', source_bufnr, source_bufnr)
+    execute printf('autocmd TermClose <buffer=%s> call s:on_term_close("%s")', source_bufnr, buffer.bufnr)
 
     return prompt
 endfunction
@@ -63,7 +65,16 @@ function! s:on_wipe_source_bufnr(source_bufnr) abort
         return
     endif
     let prompt = s:source_buf_prompts[a:source_bufnr]
-    call remove(s:buf_prompts, prompt.bufnr)
+    call remove(s:buf_prompts, prompt.buffer.bufnr)
     call prompt.close()
     call remove(s:source_buf_prompts, a:source_bufnr)
+endfunction
+
+function! s:on_term_close(bufnr) abort
+    if !has_key(s:buf_prompts, a:bufnr)
+        return
+    endif
+    let prompt = s:buf_prompts[a:bufnr]
+    call prompt.close()
+    call s:on_wipe_bufnr(a:bufnr)
 endfunction

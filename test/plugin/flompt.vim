@@ -72,3 +72,18 @@ function! s:suite.cannot_send_to_already_exited_terminal()
     Flompt send
     call s:helper.wait_terminal(channel_id)
 endfunction
+
+function! s:suite.exit_with_no_error()
+    tabedit
+
+    let channel_id = s:helper.open_terminal_sync()
+
+    Flompt
+
+    call s:helper.input(['exit'])
+    Flompt send
+    call s:helper.wait_terminal(channel_id)
+
+    wincmd p
+    quit
+endfunction

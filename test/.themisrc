@@ -26,6 +26,8 @@ function! FlomptTestHelper() abort
         if exists('b:terminal_job_id')
             call jobstop(b:terminal_job_id)
         endif
+        tabedit
+        tabonly
         silent! %bwipeout!
         execute 'cd' s:root
 
