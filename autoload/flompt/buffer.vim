@@ -11,7 +11,17 @@ function! flompt#buffer#new(source_bufnr, source_cmd) abort
     call nvim_buf_set_option(bufnr, 'filetype', 'flompt')
     call nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
 
-    function! buffer.send_contents(cursor_line) abort
+    function! buffer.send_line(cursor_line) abort
+        let line = ["\<C-u>" . getbufline(self.bufnr, a:cursor_line)[0]] + self._new_line()
+        call self._send(line)
+    endfunction
+
+    function! buffer.sync_line(cursor_line) abort
+        let line = "\<C-u>" . getbufline(self.bufnr, a:cursor_line)[0]
+        call self._send(line)
+    endfunction
+
+    function! buffer._send(data) abort
         let id = nvim_buf_get_option(self.source_bufnr, 'channel')
         if empty(id)
             return
@@ -22,8 +32,7 @@ function! flompt#buffer#new(source_bufnr, source_cmd) abort
             return
         endif
 
-        let lines = getbufline(self.bufnr, a:cursor_line) + self._new_line()
-        call chansend(id, lines)
+        call chansend(id, a:data)
     endfunction
 
     function! buffer._new_line() abort

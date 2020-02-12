@@ -77,6 +77,10 @@ function! FlomptTestHelper() abort
         sleep 300m
     endfunction
 
+    function! helper.emit_text_changed() abort
+        execute printf('doautocmd flompt:%s TextChanged', bufnr('%'))
+    endfunction
+
     return helper
 endfunction
 

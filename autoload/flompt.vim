@@ -4,6 +4,8 @@ let s:funcs = {
     \ 'open': { prompt -> prompt.open() },
     \ 'close': { prompt -> prompt.close() },
     \ 'send': { prompt -> prompt.send() },
+    \ 'start_sync': { prompt -> prompt.start_sync() },
+    \ 'stop_sync': { prompt -> prompt.stop_sync() },
 \ }
 
 function! flompt#main(...) abort

@@ -87,3 +87,26 @@ function! s:suite.exit_with_no_error()
     wincmd p
     quit
 endfunction
+
+function! s:suite.sync()
+    let channel_id = s:helper.open_terminal_sync()
+
+    Flompt start_sync
+
+    call s:helper.input(['echo 123'])
+    call s:helper.emit_text_changed()
+    call s:helper.wait_terminal(channel_id)
+
+    call s:helper.buffer_log()
+    wincmd p
+    call s:assert.prompt('echo 123')
+
+    Flompt send
+    call s:helper.wait_terminal(channel_id)
+
+    Flompt close
+    call s:helper.buffer_log()
+
+    call s:assert.prompt('')
+    call s:assert.command_result_line('123')
+endfunction

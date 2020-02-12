@@ -31,12 +31,37 @@ function! flompt#prompt#get_or_create() abort
     function! prompt.send() abort
         call self.window.open()
         let cursor_line = self.window.cursor_line()
-        call self.buffer.send_contents(cursor_line)
+        call self.buffer.send_line(cursor_line)
 
         if cursor_line == self.buffer.len()
             call self.buffer.append()
             call self.window.set_cursor(cursor_line + 1)
         endif
+    endfunction
+
+    function! prompt.sync() abort
+        let cursor_line = self.window.cursor_line()
+        call self.buffer.sync_line(cursor_line)
+    endfunction
+
+    function! prompt.start_sync() abort
+        call self.open()
+        let group_name = self._group_name()
+        execute 'augroup' group_name
+            execute printf('autocmd %s TextChanged <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
+            execute printf('autocmd %s TextChangedI <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
+            execute printf('autocmd %s TextChangedP <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
+        execute 'augroup END'
+        call self.sync()
+    endfunction
+
+    function! prompt.stop_sync() abort
+        let group_name = self._group_name()
+        execute printf('autocmd! %s TextChanged', group_name, self.buffer.bufnr)
+    endfunction
+
+    function! prompt._group_name() abort
+        return 'flompt:' . self.buffer.bufnr
     endfunction
 
     let s:buf_prompts[buffer.bufnr] = prompt
@@ -77,4 +102,12 @@ function! s:on_term_close(bufnr) abort
     let prompt = s:buf_prompts[a:bufnr]
     call prompt.close()
     call s:on_wipe_bufnr(a:bufnr)
+endfunction
+
+function! s:on_text_changed(bufnr) abort
+    if !has_key(s:buf_prompts, a:bufnr)
+        return
+    endif
+    let prompt = s:buf_prompts[a:bufnr]
+    call prompt.sync()
 endfunction
