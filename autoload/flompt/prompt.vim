@@ -48,6 +48,7 @@ function! flompt#prompt#get_or_create() abort
         call self.open()
         let group_name = self._group_name()
         execute 'augroup' group_name
+            autocmd!
             execute printf('autocmd %s TextChanged <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
             execute printf('autocmd %s TextChangedI <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
             execute printf('autocmd %s TextChangedP <buffer=%s> call s:on_text_changed("%s")', group_name, self.buffer.bufnr, self.buffer.bufnr)
