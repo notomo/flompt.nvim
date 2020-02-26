@@ -4,12 +4,16 @@ let s:source_buf_prompts = {}
 
 function! flompt#prompt#get_or_create() abort
     if &filetype ==? 'flompt'
-        return s:buf_prompts[bufnr('%')]
+        return [s:buf_prompts[bufnr('%')], v:null]
+    endif
+
+    if &buftype !=? 'terminal'
+        return [v:null, 'Not supported &buftype: ' . &buftype]
     endif
 
     let source_bufnr = bufnr('%')
     if has_key(s:source_buf_prompts, source_bufnr)
-        return s:source_buf_prompts[source_bufnr]
+        return [s:source_buf_prompts[source_bufnr], v:null]
     endif
 
     let buffer = flompt#buffer#new(source_bufnr, expand('%:t'))
@@ -71,7 +75,7 @@ function! flompt#prompt#get_or_create() abort
     execute printf('autocmd BufWipeout <buffer=%s> call s:on_wipe_source_bufnr("%s")', source_bufnr, source_bufnr)
     execute printf('autocmd TermClose <buffer=%s> call s:on_term_close("%s")', source_bufnr, buffer.bufnr)
 
-    return prompt
+    return [prompt, v:null]
 endfunction
 
 function! s:on_wipe_bufnr(bufnr) abort

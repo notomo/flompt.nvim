@@ -11,11 +11,15 @@ let s:funcs = {
 function! flompt#main(...) abort
     let arg = get(a:000, 0, '')
     if !has_key(s:funcs, arg)
-        throw 'invalid arg: ' . arg
+        return flompt#messenger#new().error('invalid arg: ' . arg)
     endif
 
     call flompt#logger#new('main').log('arg: ' . arg)
 
-    let prompt = flompt#prompt#get_or_create()
+    let [prompt, err] = flompt#prompt#get_or_create()
+    if !empty(err)
+        return flompt#messenger#new().warn(err)
+    endif
+
     return s:funcs[arg](prompt)
 endfunction

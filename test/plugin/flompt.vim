@@ -25,6 +25,7 @@ function! s:suite.open_and_send()
 endfunction
 
 function! s:suite.close_one()
+    let channel_id = s:helper.open_terminal_sync()
     Flompt
 
     Flompt close
@@ -32,17 +33,20 @@ function! s:suite.close_one()
 endfunction
 
 function! s:suite.close_none()
+    let channel_id = s:helper.open_terminal_sync()
     Flompt close
     call s:assert.window_count(1)
 endfunction
 
 function! s:suite.not_open_prompt_from_prompt()
+    let channel_id = s:helper.open_terminal_sync()
     Flompt
     Flompt
     call s:assert.window_count(2)
 endfunction
 
 function! s:suite.not_open_two_prompt_from_same_window()
+    let channel_id = s:helper.open_terminal_sync()
     Flompt
 
     wincmd p
@@ -54,6 +58,7 @@ endfunction
 function! s:suite.nop_logger()
     call flompt#logger#clear()
 
+    let channel_id = s:helper.open_terminal_sync()
     Flompt
 
     Flompt send
@@ -109,4 +114,12 @@ function! s:suite.sync()
 
     call s:assert.prompt('')
     call s:assert.command_result_line('123')
+endfunction
+
+function! s:suite.not_supprted_buftype()
+    let messenger = s:helper.messenger()
+
+    Flompt
+
+    call s:assert.message(messenger, '[flompt] Not supported &buftype: ')
 endfunction

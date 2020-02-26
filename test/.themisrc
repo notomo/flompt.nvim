@@ -16,6 +16,7 @@ function! FlomptTestHelper() abort
         execute 'cd' s:root
 
         call flompt#logger#set_func({ msg -> themis#log(msg) })
+        call flompt#messenger#set_func({ msg -> themis#log('[test messenger] ' . msg) })
         call themis#log('')
 
         filetype on
@@ -81,6 +82,18 @@ function! FlomptTestHelper() abort
         execute printf('doautocmd flompt:%s TextChanged', bufnr('%'))
     endfunction
 
+    function! helper.messenger() abort
+        let f = {'msg': '', 'called': v:false}
+        function! f.echo(msg) abort
+            let self.msg = a:msg
+            let self.called = v:true
+            call themis#log('[messenger] ' . a:msg)
+        endfunction
+
+        call flompt#messenger#set_func({ msg -> f.echo(msg) })
+        return f
+    endfunction
+
     return helper
 endfunction
 
@@ -141,6 +154,13 @@ function! s:assert() abort
     function! assert.line_number(expected) abort
         let actual = line('.')
         let message = printf('line_number should be %s, but actual: %s', a:expected, actual)
+        call self.equals(actual, a:expected, message)
+    endfunction
+
+    function! assert.message(messenger, expected) abort
+        call self.true(a:messenger.called, 'messenger should be called')
+        let actual = a:messenger.msg
+        let message = printf('message should be %s, but actual: %s', a:expected, actual)
         call self.equals(actual, a:expected, message)
     endfunction
 
