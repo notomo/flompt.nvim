@@ -1,5 +1,5 @@
 test:
-	THEMIS_VIM=nvim THEMIS_ARGS="-e -s --headless" themis
+	vusted ./test --shuffle -v
 
 doc:
 	gevdoc --externals ./doc/examples.vim
