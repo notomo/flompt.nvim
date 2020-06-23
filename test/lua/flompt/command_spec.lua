@@ -104,21 +104,3 @@ describe('flompt', function ()
     assert.command_result_line("123")
   end)
 end)
-
--- TODO to lua
--- function! s:suite.nop_logger()
---     call flompt#logger#clear()
--- 
---     let channel_id = s:helper.open_terminal_sync()
---     Flompt
--- 
---     Flompt send
--- endfunction
--- 
--- function! s:suite.not_supprted_buftype()
---     let messenger = s:helper.messenger()
--- 
---     Flompt
--- 
---     call s:assert.message(messenger, '[flompt] Not supported &buftype: ')
--- endfunction
