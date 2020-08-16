@@ -31,15 +31,15 @@ local Buffer = function(bufnr, source_bufnr, source_cmd)
     end,
     send_line = function(cursor_line)
       local line = {
-        vim.api.nvim_eval('"\\<C-u>"') .. vim.fn.getbufline(bufnr, cursor_line)[1],
-        new_line
+        vim.api.nvim_eval("\"\\<C-u>\"") .. vim.fn.getbufline(bufnr, cursor_line)[1],
+        new_line,
       }
       send(line)
     end,
     sync_line = function(cursor_line)
-      local line = vim.api.nvim_eval('"\\<C-u>"') .. vim.fn.getbufline(bufnr, cursor_line)[1]
+      local line = vim.api.nvim_eval("\"\\<C-u>\"") .. vim.fn.getbufline(bufnr, cursor_line)[1]
       send(line)
-    end
+    end,
   }
 end
 

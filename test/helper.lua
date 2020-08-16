@@ -14,8 +14,7 @@ vim.o.shell = "bash"
 M.command(("let $PS1 = '%s'"):format(prompt))
 
 -- NOTICE: for termopen callback
-vim.api.nvim_exec(
-  [[
+vim.api.nvim_exec([[
 function! FlomptTestOnStdout(id, data, event) abort
     echomsg '[stdout]' string(a:data)
 endfunction
@@ -27,9 +26,7 @@ endfunction
 function! FlomptTestOnExit(id, exit_code, event) abort
     echomsg '[exit] exit_code: ' a:exit_code
 endfunction
-]],
-  false
-)
+]], false)
 
 M.before_each = function()
   M.command("filetype on")
@@ -62,15 +59,11 @@ M.wait_terminal = function(_)
 end
 
 M.open_terminal_sync = function()
-  local channel_id =
-    vim.fn.termopen(
-    {"bash", "--noprofile", "--norc", "-eo", "pipefail"},
-    {
-      on_stdout = "FlomptTestOnStdout",
-      on_stderr = "FlomptTestOnStderr",
-      on_exit = "FlomptTestOnExit"
-    }
-  )
+  local channel_id = vim.fn.termopen({"bash", "--noprofile", "--norc", "-eo", "pipefail"}, {
+    on_stdout = "FlomptTestOnStdout",
+    on_stderr = "FlomptTestOnStderr",
+    on_exit = "FlomptTestOnExit",
+  })
   M.wait_terminal(channel_id)
   return channel_id
 end

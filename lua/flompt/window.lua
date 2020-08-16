@@ -1,4 +1,4 @@
-local buffers = require "flompt/buffer".buffers
+local buffers = require"flompt/buffer".buffers
 
 local M = {}
 
@@ -19,20 +19,16 @@ M.open = function(bufnr)
     return
   end
   local column = vim.o.columns / 2
-  vim.api.nvim_open_win(
-    bufnr,
-    true,
-    {
-      relative = "editor",
-      width = vim.o.columns / 2 - 3,
-      height = 20,
-      row = 3,
-      col = column,
-      anchor = "NW",
-      focusable = true,
-      external = false
-    }
-  )
+  vim.api.nvim_open_win(bufnr, true, {
+    relative = "editor",
+    width = vim.o.columns / 2 - 3,
+    height = 20,
+    row = 3,
+    col = column,
+    anchor = "NW",
+    focusable = true,
+    external = false,
+  })
 end
 
 M.set_cursor = function(line_number)

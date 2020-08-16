@@ -18,7 +18,7 @@ local cmds = {
   end,
   stop_sync = function(prompt)
     return prompt.stop_sync()
-  end
+  end,
 }
 
 M.main = function(...)

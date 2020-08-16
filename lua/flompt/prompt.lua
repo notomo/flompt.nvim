@@ -1,5 +1,5 @@
 local window = require "flompt/window"
-local buffers = require "flompt/buffer".buffers
+local buffers = require"flompt/buffer".buffers
 
 local M = {}
 
@@ -25,15 +25,8 @@ M.get_or_create = function()
     window.open(bufnr)
   end
 
-  vim.api.nvim_command(
-    ("autocmd BufWipeout <buffer=%s> lua require('flompt/prompt').on_source_buffer_wiped(%s)"):format(
-      source_bufnr,
-      bufnr
-    )
-  )
-  vim.api.nvim_command(
-    ("autocmd TermClose <buffer=%s> lua require('flompt/prompt').on_term_closed(%s)"):format(source_bufnr, bufnr)
-  )
+  vim.api.nvim_command(("autocmd BufWipeout <buffer=%s> lua require('flompt/prompt').on_source_buffer_wiped(%s)"):format(source_bufnr, bufnr))
+  vim.api.nvim_command(("autocmd TermClose <buffer=%s> lua require('flompt/prompt').on_term_closed(%s)"):format(source_bufnr, bufnr))
 
   local group_name = "flompt:" .. bufnr
 
@@ -52,33 +45,15 @@ M.get_or_create = function()
     start_sync = function()
       open()
       vim.api.nvim_command(("augroup %s"):format(group_name))
-      vim.api.nvim_command(
-        ("autocmd %s TextChanged <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(
-          group_name,
-          bufnr,
-          bufnr
-        )
-      )
-      vim.api.nvim_command(
-        ("autocmd %s TextChangedI <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(
-          group_name,
-          bufnr,
-          bufnr
-        )
-      )
-      vim.api.nvim_command(
-        ("autocmd %s TextChangedP <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(
-          group_name,
-          bufnr,
-          bufnr
-        )
-      )
+      vim.api.nvim_command(("autocmd %s TextChanged <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
+      vim.api.nvim_command(("autocmd %s TextChangedI <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
+      vim.api.nvim_command(("autocmd %s TextChangedP <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
       vim.api.nvim_command("augroup END")
       sync(buffer)
     end,
     stop_sync = function()
       vim.api.nvim_command(("autocmd! %s TextChanged"):format(group_name))
-    end
+    end,
   }, nil
 end
 

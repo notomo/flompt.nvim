@@ -2,19 +2,19 @@ local helper = require "test.helper"
 local assert = helper.assert
 local command = helper.command
 
-describe('flompt', function ()
+describe("flompt", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it('can open and send', function ()
+  it("can open and send", function()
     local channel_id = helper.open_terminal_sync()
     helper.buffer_log()
 
     command("Flompt")
     assert.window_count(2)
 
-    helper.input({'echo 123'})
+    helper.input({"echo 123"})
 
     local before_line = vim.fn.line(".")
     command("Flompt send")
@@ -28,7 +28,7 @@ describe('flompt', function ()
     assert.command_result_line("123")
   end)
 
-  it('can close', function ()
+  it("can close", function()
     helper.open_terminal_sync()
     command("Flompt")
 
@@ -36,13 +36,13 @@ describe('flompt', function ()
     assert.window_count(1)
   end)
 
-  it('can close even if no prompt', function ()
+  it("can close even if no prompt", function()
     helper.open_terminal_sync()
     command("Flompt close")
     assert.window_count(1)
   end)
 
-  it('does not open two prompt from the same window', function ()
+  it("does not open two prompt from the same window", function()
     helper.open_terminal_sync()
     command("Flompt")
 
@@ -52,28 +52,28 @@ describe('flompt', function ()
     assert.window_count(2)
   end)
 
-  it('cannot send to already exited terminal', function ()
+  it("cannot send to already exited terminal", function()
     local channel_id = helper.open_terminal_sync()
 
     command("Flompt")
 
-    helper.input({'exit'})
+    helper.input({"exit"})
     command("Flompt send")
     helper.wait_terminal(channel_id)
 
-    helper.input({'echo 123'})
+    helper.input({"echo 123"})
     command("Flompt send")
     helper.wait_terminal(channel_id)
   end)
 
-  it('can exit with no error', function ()
+  it("can exit with no error", function()
     command("tabedit")
 
     local channel_id = helper.open_terminal_sync()
 
     command("Flompt")
 
-    helper.input({'exit'})
+    helper.input({"exit"})
     command("Flompt send")
     helper.wait_terminal(channel_id)
 
@@ -81,7 +81,7 @@ describe('flompt', function ()
     command("quit")
   end)
 
-  it('can sync', function ()
+  it("can sync", function()
     local channel_id = helper.open_terminal_sync()
 
     command("Flompt start_sync")
