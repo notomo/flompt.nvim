@@ -18,10 +18,10 @@ M.open = function(bufnr)
     vim.api.nvim_set_current_win(id)
     return
   end
-  local column = vim.o.columns / 2
+  local column = math.floor(vim.o.columns / 2)
   vim.api.nvim_open_win(bufnr, true, {
     relative = "editor",
-    width = vim.o.columns / 2 - 3,
+    width = column - 3,
     height = 20,
     row = 3,
     col = column,
