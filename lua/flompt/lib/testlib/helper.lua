@@ -1,6 +1,6 @@
 local M = {}
 
-local root, err = require("flompt/lib/path").find_root("flompt.nvim")
+local root, err = require("flompt/lib/path").find_root("flompt/*.lua")
 if err ~= nil then
   error(err)
 end
