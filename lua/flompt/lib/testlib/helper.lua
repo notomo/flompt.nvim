@@ -14,8 +14,7 @@ local prompt_name = "test_prompt"
 local prompt = ("[%s]"):format(prompt_name)
 
 vim.o.shell = "bash"
-
-M.command(("let $PS1 = '%s'"):format(prompt))
+vim.env.PS1 = prompt
 
 M.before_each = function()
   M.command("filetype on")
@@ -80,8 +79,7 @@ M.emit_text_changed = function()
   M.command(("doautocmd flompt:%s TextChanged"):format(vim.fn.bufnr("%")))
 end
 
-local vassert = require("vusted.assert")
-local asserts = vassert.asserts
+local asserts = require("vusted.assert").asserts
 
 asserts.create("window_count"):register_eq(function()
   return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
