@@ -1,5 +1,3 @@
-vim.o.runtimepath = vim.fn.getcwd() .. "," .. vim.o.runtimepath
-
 local gen = function()
   require("genvdoc").generate("flompt.nvim", {
     chapters = {
@@ -15,7 +13,7 @@ local gen = function()
       {
         name = "EXAMPLES",
         body = function()
-          local f = io.open("./test/example.vim", "r")
+          local f = io.open("./spec/example.vim", "r")
           local lines = {}
           for line in f:lines() do
             if line == "" then

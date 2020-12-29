@@ -1,8 +1,8 @@
 test:
-	vusted ./test --shuffle -v
+	vusted --shuffle -v
 .PHONY: test
 
 doc:
-	nvim --headless -i NONE +"lua dofile('./test/doc.lua')" +"quitall!"
+	nvim --headless -i NONE +"lua dofile('./spec/doc.lua')" +"quitall!"
 	cat ./doc/flompt.nvim.txt
 .PHONY: doc
