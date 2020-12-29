@@ -1,20 +1,20 @@
 *flompt.nvim.txt*
 
 ==============================================================================
-COMMANDS                                                *flompt.nvim-commands*
+COMMANDS                                                *flompt.nvim-COMMANDS*
 
-:Flompt                                                              *:Flompt*
+:Flompt [{arg}]                                                      *:Flompt*
   Open a floating window for terminal command input.
->
-  :Flompt " open a window for input
-  :Flompt send " send line under the cursor to terminal
-  :Flompt close " close the window
-  :Flompt sync_start " sync input line to terminal
-  :Flompt sync_stop " stop sync
-<
+
+  Commands: ~
+   `open` or no: open a window for input
+   `send`: send line under the cursor to terminal
+   `close`: close the window
+   `sync_start`: sync input line to terminal
+   `sync_stop`: stop sync
 
 ==============================================================================
-EXAMPLES                                                *flompt.nvim-examples*
+EXAMPLES                                                *flompt.nvim-EXAMPLES*
 
 >
   nnoremap <Leader>f <Cmd>Flompt<CR>

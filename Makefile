@@ -3,5 +3,6 @@ test:
 .PHONY: test
 
 doc:
-	gevdoc --externals ./doc/examples.vim
+	nvim --headless -i NONE +"lua dofile('./test/doc.lua')" +"quitall!"
+	cat ./doc/flompt.nvim.txt
 .PHONY: doc
