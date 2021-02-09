@@ -1,18 +1,14 @@
-local window = require "flompt/window"
-local buffers = require"flompt/buffer".buffers
+local window = require("flompt.window")
+local buffers = require("flompt.buffer").buffers
+local vim = vim
 
 local M = {}
 
-local sync = function(buffer)
-  local cursor_line = window.cursor_line()
-  buffer.sync_line(cursor_line)
-end
+local Prompt = {}
+Prompt.__index = Prompt
+M.Prompt = Prompt
 
-local close = function()
-  window.close()
-end
-
-M.get_or_create = function()
+function Prompt.get_or_create()
   local buffer, err = buffers.get_or_create()
   if err ~= nil then
     return nil, err
@@ -20,41 +16,43 @@ M.get_or_create = function()
   local bufnr = buffer.bufnr
   local source_bufnr = buffer.source_bufnr
 
-  local open = function()
-    vim.api.nvim_win_set_cursor(0, {vim.fn.line("$"), 0})
-    window.open(bufnr)
+  vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.prompt').on_source_buffer_wiped(%s)"):format(source_bufnr, bufnr))
+  vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.prompt').on_term_closed(%s)"):format(source_bufnr, bufnr))
+
+  local tbl = {_buffer = buffer, _bufnr = bufnr, _group_name = "flompt:" .. bufnr}
+  return setmetatable(tbl, Prompt)
+end
+
+function Prompt.open(self)
+  vim.api.nvim_win_set_cursor(0, {vim.fn.line("$"), 0})
+  window.open(self._bufnr)
+
+  vim.cmd(("augroup %s"):format(self._group_name))
+  vim.cmd(("autocmd %s TextChanged <buffer=%s> lua require('flompt.prompt').on_text_changed(%s)"):format(self._group_name, self._bufnr, self._bufnr))
+  vim.cmd(("autocmd %s TextChangedI <buffer=%s> lua require('flompt.prompt').on_text_changed(%s)"):format(self._group_name, self._bufnr, self._bufnr))
+  vim.cmd(("autocmd %s TextChangedP <buffer=%s> lua require('flompt.prompt').on_text_changed(%s)"):format(self._group_name, self._bufnr, self._bufnr))
+  vim.cmd("augroup END")
+
+  Prompt.sync(self._buffer)
+end
+
+function Prompt.send(self)
+  window.open(self._bufnr)
+  local cursor_line = window.cursor_line()
+  self._buffer.send_line(cursor_line)
+  if cursor_line == self._buffer.len() then
+    self._buffer.append()
+    window.set_cursor(cursor_line + 1)
   end
+end
 
-  vim.api.nvim_command(("autocmd BufWipeout <buffer=%s> lua require('flompt/prompt').on_source_buffer_wiped(%s)"):format(source_bufnr, bufnr))
-  vim.api.nvim_command(("autocmd TermClose <buffer=%s> lua require('flompt/prompt').on_term_closed(%s)"):format(source_bufnr, bufnr))
+function Prompt.sync(buffer)
+  local cursor_line = window.cursor_line()
+  buffer.sync_line(cursor_line)
+end
 
-  local group_name = "flompt:" .. bufnr
-
-  return {
-    open = open,
-    close = close,
-    send = function()
-      window.open(bufnr)
-      local cursor_line = window.cursor_line()
-      buffer.send_line(cursor_line)
-      if cursor_line == buffer.len() then
-        buffer.append()
-        window.set_cursor(cursor_line + 1)
-      end
-    end,
-    start_sync = function()
-      open()
-      vim.api.nvim_command(("augroup %s"):format(group_name))
-      vim.api.nvim_command(("autocmd %s TextChanged <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
-      vim.api.nvim_command(("autocmd %s TextChangedI <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
-      vim.api.nvim_command(("autocmd %s TextChangedP <buffer=%s> lua require('flompt/prompt').on_text_changed(%s)"):format(group_name, bufnr, bufnr))
-      vim.api.nvim_command("augroup END")
-      sync(buffer)
-    end,
-    stop_sync = function()
-      vim.api.nvim_command(("autocmd! %s TextChanged"):format(group_name))
-    end,
-  }, nil
+function Prompt.close()
+  window.close()
 end
 
 M.on_text_changed = function(bufnr)
@@ -62,7 +60,7 @@ M.on_text_changed = function(bufnr)
   if buffer == nil then
     return
   end
-  sync(buffer)
+  Prompt.sync(buffer)
 end
 
 M.on_term_closed = function(bufnr)
@@ -70,7 +68,7 @@ M.on_term_closed = function(bufnr)
   if buffer == nil then
     return
   end
-  close()
+  Prompt.close()
 end
 
 M.on_source_buffer_wiped = function(bufnr)
@@ -78,7 +76,7 @@ M.on_source_buffer_wiped = function(bufnr)
   if buffer == nil then
     return
   end
-  close()
+  Prompt.close()
 end
 
 return M

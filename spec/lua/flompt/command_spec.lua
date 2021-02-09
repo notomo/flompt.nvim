@@ -1,5 +1,5 @@
-local helper = require("flompt/lib/testlib/helper")
-local command = helper.command
+local helper = require("flompt.lib.testlib.helper")
+local flompt = require("flompt")
 
 describe("flompt", function()
 
@@ -10,17 +10,17 @@ describe("flompt", function()
     local channel_id = helper.open_terminal_sync()
     helper.buffer_log()
 
-    command("Flompt")
+    flompt.open()
     assert.window_count(2)
 
     helper.input({"echo 123"})
 
     local before_line = vim.fn.line(".")
-    command("Flompt send")
+    flompt.send()
     helper.wait_terminal(channel_id)
     assert.line_number(before_line + 1)
 
-    command("Flompt close")
+    flompt.close()
     helper.buffer_log()
 
     assert.prompt("")
@@ -29,24 +29,24 @@ describe("flompt", function()
 
   it("can close", function()
     helper.open_terminal_sync()
-    command("Flompt")
+    flompt.open()
 
-    command("Flompt close")
+    flompt.close()
     assert.window_count(1)
   end)
 
   it("can close even if no prompt", function()
     helper.open_terminal_sync()
-    command("Flompt close")
+    flompt.close()
     assert.window_count(1)
   end)
 
   it("does not open two prompt from the same window", function()
     helper.open_terminal_sync()
-    command("Flompt")
+    flompt.open()
 
-    command("wincmd p")
-    command("Flompt")
+    vim.cmd("wincmd p")
+    flompt.open()
 
     assert.window_count(2)
   end)
@@ -54,49 +54,49 @@ describe("flompt", function()
   it("cannot send to already exited terminal", function()
     local channel_id = helper.open_terminal_sync()
 
-    command("Flompt")
+    flompt.open()
 
     helper.input({"exit"})
-    command("Flompt send")
+    flompt.send()
     helper.wait_terminal(channel_id)
 
     helper.input({"echo 123"})
-    command("Flompt send")
+    flompt.send()
     helper.wait_terminal(channel_id)
   end)
 
   it("can exit with no error", function()
-    command("tabedit")
+    vim.cmd("tabedit")
 
     local channel_id = helper.open_terminal_sync()
 
-    command("Flompt")
+    flompt.open()
 
     helper.input({"exit"})
-    command("Flompt send")
+    flompt.send()
     helper.wait_terminal(channel_id)
 
-    command("wincmd p")
-    command("quit")
+    vim.cmd("wincmd p")
+    vim.cmd("quit")
   end)
 
   it("can sync", function()
     local channel_id = helper.open_terminal_sync()
 
-    command("Flompt start_sync")
+    flompt.open()
 
     helper.input({"echo 123"})
     helper.emit_text_changed()
     helper.wait_terminal(channel_id)
 
     helper.buffer_log()
-    command("wincmd p")
+    vim.cmd("wincmd p")
     assert.prompt("echo 123")
 
-    command("Flompt send")
+    flompt.send()
     helper.wait_terminal(channel_id)
 
-    command("Flompt close")
+    flompt.close()
     helper.buffer_log()
 
     assert.prompt("")

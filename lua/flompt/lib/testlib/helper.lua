@@ -1,14 +1,6 @@
 local M = {}
 
-local root, err = require("flompt/lib/path").find_root("flompt/*.lua")
-if err ~= nil then
-  error(err)
-end
-M.root = root
-
-M.command = function(cmd)
-  vim.api.nvim_command(cmd)
-end
+M.root = require("flompt.lib.path").find_root()
 
 local prompt_name = "test_prompt"
 local prompt = ("[%s]"):format(prompt_name)
@@ -17,16 +9,16 @@ vim.o.shell = "bash"
 vim.env.PS1 = prompt
 
 M.before_each = function()
-  M.command("filetype on")
-  M.command("syntax enable")
+  vim.cmd("filetype on")
+  vim.cmd("syntax enable")
 end
 
 M.after_each = function()
-  M.command("tabedit")
-  M.command("tabonly!")
-  M.command("silent! %bwipeout!")
-  M.command("filetype off")
-  M.command("syntax off")
+  vim.cmd("tabedit")
+  vim.cmd("tabonly!")
+  vim.cmd("silent! %bwipeout!")
+  vim.cmd("filetype off")
+  vim.cmd("syntax off")
   print(" ")
 end
 
@@ -43,7 +35,7 @@ end
 
 M.wait_terminal = function(_)
   -- HACK: How to wait terminal drawing?
-  M.command("sleep 300ms")
+  vim.cmd("sleep 300ms")
 end
 
 M.open_terminal_sync = function()
@@ -66,7 +58,7 @@ M.open_terminal_sync = function()
 end
 
 M._search_last_prompt = function()
-  M.command("normal! G")
+  vim.cmd("normal! G")
   local result = vim.fn.search(prompt_name, "bW")
   if result == 0 then
     local msg = ("not found prompt: %s"):format(prompt_name)
@@ -76,7 +68,7 @@ M._search_last_prompt = function()
 end
 
 M.emit_text_changed = function()
-  M.command(("doautocmd flompt:%s TextChanged"):format(vim.fn.bufnr("%")))
+  vim.cmd(("doautocmd flompt:%s TextChanged"):format(vim.fn.bufnr("%")))
 end
 
 local asserts = require("vusted.assert").asserts
@@ -92,7 +84,7 @@ end)
 
 asserts.create("command_result_line"):register_eq(function()
   M._search_last_prompt()
-  M.command("normal! k")
+  vim.cmd("normal! k")
   return vim.fn.getline(".")
 end)
 

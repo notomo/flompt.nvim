@@ -1,4 +1,5 @@
 local buffers = require"flompt/buffer".buffers
+local vim = vim
 
 local M = {}
 

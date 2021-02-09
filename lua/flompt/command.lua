@@ -1,41 +1,48 @@
-local prompts = require "flompt/prompt"
-local messenger = require "flompt/messenger"
+local Prompt = require("flompt.prompt").Prompt
+local messagelib = require("flompt.lib.message")
 
 local M = {}
 
-local cmds = {
-  open = function(prompt)
-    return prompt.open()
-  end,
-  close = function(prompt)
-    return prompt.close()
-  end,
-  send = function(prompt)
-    return prompt.send()
-  end,
-  start_sync = function(prompt)
-    return prompt.start_sync()
-  end,
-  stop_sync = function(prompt)
-    return prompt.stop_sync()
-  end,
-}
+local Command = {}
+Command.__index = Command
+M.Command = Command
 
-M.main = function(...)
+function Command.new(name, ...)
   local args = {...}
-
-  local name = args[1]
-  if name == nil then
-    name = "open"
+  local f = function()
+    return Command[name](unpack(args))
   end
-  local cmd = cmds[name]
 
-  local prompt, err = prompts.get_or_create()
+  local ok, msg = xpcall(f, debug.traceback)
+  if not ok then
+    return messagelib.error(msg)
+  elseif msg then
+    return messagelib.warn(msg)
+  end
+end
+
+function Command.open()
+  local prompt, err = Prompt.get_or_create()
   if err ~= nil then
-    return messenger.warn(err)
+    return err
   end
+  return prompt:open()
+end
 
-  cmd(prompt)
+function Command.send()
+  local prompt, err = Prompt.get_or_create()
+  if err ~= nil then
+    return err
+  end
+  return prompt:send()
+end
+
+function Command.close()
+  local prompt, err = Prompt.get_or_create()
+  if err ~= nil then
+    return err
+  end
+  return prompt:close()
 end
 
 return M

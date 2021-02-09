@@ -1,3 +1,5 @@
+local vim = vim
+
 local M = {}
 
 local Buffer = function(bufnr, source_bufnr, source_cmd)
@@ -51,7 +53,7 @@ buffers.find = function(bufnr)
     return nil
   end
   local path = vim.api.nvim_buf_get_name(bufnr)
-  if vim.api.nvim_buf_get_option(bufnr, "filetype") == filetype then
+  if vim.bo[bufnr].filetype == filetype then
     local source_cmd = vim.fn.fnamemodify(path, ":t")
     local source_bufnr = vim.fn.matchstr(vim.fn.expand(path, ":p"), "\\vflompt://\\zs(\\d+)\\ze")
     return Buffer(bufnr, source_bufnr, source_cmd)
@@ -77,8 +79,8 @@ buffers.get_or_create = function()
   if bufnr == -1 then
     bufnr = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(bufnr, name)
-    vim.api.nvim_buf_set_option(bufnr, "filetype", filetype)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+    vim.bo[bufnr].filetype = filetype
+    vim.bo[bufnr].bufhidden = "wipe"
   end
 
   return Buffer(bufnr, source_bufnr, source_cmd), nil
