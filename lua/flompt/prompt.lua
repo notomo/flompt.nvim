@@ -1,5 +1,5 @@
 local window = require("flompt.window")
-local buffers = require("flompt.buffer").buffers
+local Buffer = require("flompt.buffer").Buffer
 local vim = vim
 
 local M = {}
@@ -9,7 +9,7 @@ Prompt.__index = Prompt
 M.Prompt = Prompt
 
 function Prompt.get_or_create()
-  local buffer, err = buffers.get_or_create()
+  local buffer, err = Buffer.get_or_create()
   if err ~= nil then
     return nil, err
   end
@@ -39,16 +39,16 @@ end
 function Prompt.send(self)
   window.open(self._bufnr)
   local cursor_line = window.cursor_line()
-  self._buffer.send_line(cursor_line)
-  if cursor_line == self._buffer.len() then
-    self._buffer.append()
+  self._buffer:send_line(cursor_line)
+  if cursor_line == self._buffer:length() then
+    self._buffer:append()
     window.set_cursor(cursor_line + 1)
   end
 end
 
 function Prompt.sync(buffer)
   local cursor_line = window.cursor_line()
-  buffer.sync_line(cursor_line)
+  buffer:sync_line(cursor_line)
 end
 
 function Prompt.close()
@@ -56,7 +56,7 @@ function Prompt.close()
 end
 
 M.on_text_changed = function(bufnr)
-  local buffer = buffers.find(bufnr)
+  local buffer = Buffer.find(bufnr)
   if buffer == nil then
     return
   end
@@ -64,7 +64,7 @@ M.on_text_changed = function(bufnr)
 end
 
 M.on_term_closed = function(bufnr)
-  local buffer = buffers.find(bufnr)
+  local buffer = Buffer.find(bufnr)
   if buffer == nil then
     return
   end
@@ -72,7 +72,7 @@ M.on_term_closed = function(bufnr)
 end
 
 M.on_source_buffer_wiped = function(bufnr)
-  local buffer = buffers.find(bufnr)
+  local buffer = Buffer.find(bufnr)
   if buffer == nil then
     return
   end

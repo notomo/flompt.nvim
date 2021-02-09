@@ -1,4 +1,4 @@
-local buffers = require"flompt/buffer".buffers
+local Buffer = require("flompt/buffer").Buffer
 local vim = vim
 
 local M = {}
@@ -7,7 +7,7 @@ local get = function()
   local ids = vim.api.nvim_tabpage_list_wins(0)
   for _, id in ipairs(ids) do
     local bufnr = vim.fn.winbufnr(id)
-    if buffers.exists(bufnr) then
+    if Buffer.exists(bufnr) then
       return id
     end
   end
