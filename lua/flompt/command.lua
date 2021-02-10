@@ -37,12 +37,21 @@ function Command.send()
   return prompt:send()
 end
 
-function Command.close()
-  local prompt, err = Prompt.get_or_create()
-  if err ~= nil then
-    return err
+function Command.close(bufnr)
+  local prompt = Prompt.get(bufnr)
+  if prompt == nil then
+    return
   end
   return prompt:close()
+end
+
+function Command.sync(bufnr)
+  vim.validate({bufnr = {bufnr, "number"}})
+  local prompt = Prompt.get(bufnr)
+  if prompt == nil then
+    return
+  end
+  return prompt:sync()
 end
 
 return M

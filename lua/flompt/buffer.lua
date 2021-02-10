@@ -20,7 +20,7 @@ function Buffer.new(bufnr, source_bufnr, source_cmd)
     new_line = "\r"
   end
 
-  local tbl = {bufnr = bufnr, source_bufnr = source_bufnr, _new_line = new_line}
+  local tbl = {bufnr = bufnr, _source_bufnr = source_bufnr, _new_line = new_line}
   return setmetatable(tbl, Buffer)
 end
 
@@ -63,6 +63,16 @@ function Buffer.get_or_create()
     vim.bo[bufnr].bufhidden = "wipe"
   end
 
+  vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
+  vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
+
+  local group_name = "flompt:" .. bufnr
+  vim.cmd(("augroup %s"):format(group_name))
+  vim.cmd(("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
+  vim.cmd(("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
+  vim.cmd(("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
+  vim.cmd("augroup END")
+
   return Buffer.new(bufnr, source_bufnr, source_cmd), nil
 end
 
@@ -82,7 +92,7 @@ function Buffer.sync_line(self, cursor_line)
 end
 
 function Buffer._send(self, line)
-  local id = vim.bo[self.source_bufnr].channel
+  local id = vim.bo[self._source_bufnr].channel
   if id == "" then
     return
   end
