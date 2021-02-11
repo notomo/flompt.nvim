@@ -7,6 +7,7 @@ Buffer.__index = Buffer
 M.Buffer = Buffer
 
 local FILETYPE = "flompt"
+local PATH_PREFIX = FILETYPE .. "://"
 
 function Buffer.new(bufnr, source_bufnr, source_cmd)
   vim.validate({
@@ -24,36 +25,44 @@ function Buffer.new(bufnr, source_bufnr, source_cmd)
   return setmetatable(tbl, Buffer)
 end
 
-function Buffer.find(bufnr)
-  vim.validate({bufnr = {bufnr, "number"}})
+function Buffer._find()
+  local ids = vim.api.nvim_tabpage_list_wins(0)
+  for _, id in ipairs(ids) do
+    local bufnr = vim.fn.winbufnr(id)
+    local path = vim.api.nvim_buf_get_name(bufnr)
+    if vim.startswith(path, PATH_PREFIX) then
+      return bufnr
+    end
+  end
+end
 
-  if not vim.api.nvim_buf_is_valid(bufnr) then
+function Buffer.find(bufnr)
+  vim.validate({bufnr = {bufnr, "number", true}})
+  bufnr = bufnr or Buffer._find()
+
+  if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
     return nil
   end
 
   if vim.bo[bufnr].filetype == FILETYPE then
     local path = vim.api.nvim_buf_get_name(bufnr)
     local source_cmd = vim.fn.fnamemodify(path, ":t")
-    local source_bufnr = vim.fn.matchstr(vim.fn.expand(path, ":p"), "\\vflompt://\\zs(\\d+)\\ze")
+    local pattern = ("\\v%s\\zs(\\d+)\\ze"):format(PATH_PREFIX)
+    local source_bufnr = vim.fn.matchstr(path, pattern)
     return Buffer.new(bufnr, tonumber(source_bufnr), source_cmd)
   end
 
   return nil
 end
 
-function Buffer.get_or_create()
-  local buffer = Buffer.find(vim.fn.bufnr("%"))
-  if buffer ~= nil then
-    return buffer, nil
-  end
-
+function Buffer.create()
   if vim.bo.buftype ~= "terminal" then
     return nil, "Not supported &buftype: " .. vim.bo.buftype
   end
 
   local source_cmd = vim.fn.expand("%:t")
   local source_bufnr = vim.fn.bufnr("%")
-  local name = ("flompt://%d/%s"):format(source_bufnr, source_cmd)
+  local name = ("%s%d/%s"):format(PATH_PREFIX, source_bufnr, source_cmd)
   local pattern = ("^%s$"):format(name)
   local bufnr = vim.fn.bufnr(pattern)
   if bufnr == -1 then
@@ -76,18 +85,20 @@ function Buffer.get_or_create()
   return Buffer.new(bufnr, source_bufnr, source_cmd), nil
 end
 
-function Buffer.send_line(self, cursor_line)
-  vim.validate({cursor_line = {cursor_line, "number"}})
+local CTRL_U = vim.api.nvim_eval("\"\\<C-u>\"")
+
+function Buffer.send_line(self, row)
+  vim.validate({row = {row, "number"}})
   local line = {
-    vim.api.nvim_eval("\"\\<C-u>\"") .. vim.fn.getbufline(self.bufnr, cursor_line)[1],
+    CTRL_U .. vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1],
     self._new_line,
   }
   self:_send(line)
 end
 
-function Buffer.sync_line(self, cursor_line)
-  vim.validate({cursor_line = {cursor_line, "number"}})
-  local line = vim.api.nvim_eval("\"\\<C-u>\"") .. vim.fn.getbufline(self.bufnr, cursor_line)[1]
+function Buffer.sync_line(self, row)
+  vim.validate({row = {row, "number"}})
+  local line = {CTRL_U .. vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1]}
   self:_send(line)
 end
 
@@ -111,12 +122,6 @@ end
 
 function Buffer.length(self)
   return vim.api.nvim_buf_line_count(self.bufnr)
-end
-
-function Buffer.exists(bufnr)
-  vim.validate({bufnr = {bufnr, "number"}})
-  local path = vim.api.nvim_buf_get_name(bufnr)
-  return vim.startswith(path, "flompt://")
 end
 
 return M

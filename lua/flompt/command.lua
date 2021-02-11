@@ -22,17 +22,13 @@ function Command.new(name, ...)
 end
 
 function Command.open()
-  local prompt, err = Prompt.get_or_create()
-  if err ~= nil then
-    return err
-  end
-  return prompt:open()
+  return Prompt.open()
 end
 
 function Command.send()
-  local prompt, err = Prompt.get_or_create()
-  if err ~= nil then
-    return err
+  local prompt = Prompt.get()
+  if prompt == nil then
+    return "state is not found"
   end
   return prompt:send()
 end
@@ -49,7 +45,7 @@ function Command.sync(bufnr)
   vim.validate({bufnr = {bufnr, "number"}})
   local prompt = Prompt.get(bufnr)
   if prompt == nil then
-    return
+    return "state is not found"
   end
   return prompt:sync()
 end

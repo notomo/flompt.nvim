@@ -92,6 +92,7 @@ describe("flompt", function()
     helper.buffer_log()
     vim.cmd("wincmd p")
     assert.prompt("echo 123")
+    vim.cmd("wincmd p")
 
     flompt.send()
     helper.wait_terminal(channel_id)

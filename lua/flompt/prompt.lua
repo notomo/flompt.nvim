@@ -1,5 +1,6 @@
-local window = require("flompt.window")
 local Buffer = require("flompt.buffer").Buffer
+local windowlib = require("flompt.lib.window")
+local cursorlib = require("flompt.lib.cursor")
 local vim = vim
 
 local M = {}
@@ -8,51 +9,70 @@ local Prompt = {}
 Prompt.__index = Prompt
 M.Prompt = Prompt
 
-function Prompt.new(buffer)
-  local tbl = {_buffer = buffer}
+function Prompt.new(buffer, window_id)
+  vim.validate({buffer = {buffer, "table"}, window_id = {window_id, "number"}})
+  local tbl = {_buffer = buffer, _window_id = window_id}
   return setmetatable(tbl, Prompt)
 end
 
-function Prompt.get_or_create()
-  local buffer, err = Buffer.get_or_create()
-  if err ~= nil then
-    return nil, err
+function Prompt.open()
+  local prompt = Prompt.get()
+  if prompt ~= nil then
+    return prompt:enter()
   end
-  return Prompt.new(buffer), nil
+
+  local buffer, err = Buffer.create()
+  if err ~= nil then
+    return err
+  end
+  cursorlib.to_bottom()
+
+  local column = math.floor(vim.o.columns / 2)
+  local window_id = vim.api.nvim_open_win(buffer.bufnr, true, {
+    relative = "editor",
+    width = column - 2,
+    height = math.floor(vim.o.lines * 0.4),
+    row = 2,
+    col = column,
+    anchor = "NW",
+    focusable = true,
+    external = false,
+  })
+
+  Prompt.new(buffer, window_id):sync()
 end
 
 function Prompt.get(bufnr)
   vim.validate({bufnr = {bufnr, "number", true}})
-  local buffer = Buffer.find(bufnr or vim.api.nvim_get_current_buf())
+  local buffer = Buffer.find(bufnr)
   if buffer == nil then
     return
   end
-  return Prompt.new(buffer)
-end
 
-function Prompt.open(self)
-  vim.api.nvim_win_set_cursor(0, {vim.fn.line("$"), 0})
-  window.open(self._buffer.bufnr)
-  self:sync()
+  local window_id = vim.fn.win_findbuf(buffer.bufnr)[1]
+  return Prompt.new(buffer, window_id)
 end
 
 function Prompt.send(self)
-  window.open(self._buffer.bufnr)
-  local cursor_line = window.cursor_line()
-  self._buffer:send_line(cursor_line)
-  if cursor_line == self._buffer:length() then
+  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+  self._buffer:send_line(row)
+  if row == self._buffer:length() then
     self._buffer:append()
-    window.set_cursor(cursor_line + 1)
+    cursorlib.to_bottom(self._buffer.bufnr, self._window_id)
   end
 end
 
 function Prompt.sync(self)
-  local cursor_line = window.cursor_line()
-  self._buffer:sync_line(cursor_line)
+  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+  self._buffer:sync_line(row)
 end
 
-function Prompt.close()
-  window.close()
+function Prompt.close(self)
+  windowlib.close(self._window_id)
+end
+
+function Prompt.enter(self)
+  windowlib.enter(self._window_id)
 end
 
 return M
