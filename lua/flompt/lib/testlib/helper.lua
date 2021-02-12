@@ -9,6 +9,10 @@ vim.o.shell = "bash"
 vim.env.PS1 = prompt
 
 M.before_each = function()
+  vim.env.HISTFILE = ""
+  M.test_data_path = "spec/test_data/" .. math.random(1, 2 ^ 30) .. "/"
+  M.test_data_dir = M.root .. "/" .. M.test_data_path
+  M.new_directory("")
   vim.cmd("filetype on")
   vim.cmd("syntax enable")
 end
@@ -19,6 +23,7 @@ M.after_each = function()
   vim.cmd("silent! %bwipeout!")
   vim.cmd("filetype off")
   vim.cmd("syntax off")
+  vim.fn.delete(M.root .. "/spec/test_data", "rf")
   print(" ")
 end
 
@@ -31,6 +36,22 @@ M.buffer_log = function()
   for _, line in ipairs(lines) do
     print(line)
   end
+end
+
+M.new_file = function(path, ...)
+  local f = io.open(M.test_data_dir .. path, "w")
+  for _, line in ipairs({...}) do
+    f:write(line .. "\n")
+  end
+  f:close()
+end
+
+M.new_directory = function(path)
+  vim.fn.mkdir(M.test_data_dir .. path, "p")
+end
+
+M.delete = function(path)
+  vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
 M.wait_terminal = function(_)
@@ -90,6 +111,17 @@ end)
 
 asserts.create("line_number"):register_eq(function()
   return vim.fn.line(".")
+end)
+
+asserts.create("exists_pattern"):register(function(self)
+  return function(_, args)
+    local pattern = args[1]
+    pattern = pattern:gsub("\n", "\\n")
+    local result = vim.fn.search(pattern, "n")
+    self:set_positive(("`%s` not found"):format(pattern))
+    self:set_negative(("`%s` found"):format(pattern))
+    return result ~= 0
+  end
 end)
 
 return M

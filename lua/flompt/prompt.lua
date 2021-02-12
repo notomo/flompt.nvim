@@ -38,6 +38,7 @@ function Prompt.open()
     focusable = true,
     external = false,
   })
+  cursorlib.to_bottom(buffer.bufnr, window_id)
 
   Prompt.new(buffer, window_id):sync()
 end

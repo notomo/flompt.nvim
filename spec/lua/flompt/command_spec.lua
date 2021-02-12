@@ -103,4 +103,20 @@ describe("flompt", function()
     assert.prompt("")
     assert.command_result_line("123")
   end)
+
+  it("can load bash history", function()
+    helper.new_file("test_history", [[
+ls
+cat]])
+    vim.env.HISTFILE = helper.test_data_path .. "test_history"
+    local channel_id = helper.open_terminal_sync()
+
+    flompt.open()
+    helper.wait_terminal(channel_id)
+
+    assert.exists_pattern([[
+ls
+cat
+]])
+  end)
 end)

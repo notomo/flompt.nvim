@@ -1,3 +1,4 @@
+local history = require("flompt.history")
 local vim = vim
 
 local M = {}
@@ -70,6 +71,7 @@ function Buffer.create()
     vim.api.nvim_buf_set_name(bufnr, name)
     vim.bo[bufnr].filetype = FILETYPE
     vim.bo[bufnr].bufhidden = "wipe"
+    history.load(bufnr)
   end
 
   vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
