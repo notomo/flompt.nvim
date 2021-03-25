@@ -30,14 +30,17 @@ function Prompt.open()
   local column = math.floor(vim.o.columns / 2)
   local window_id = vim.api.nvim_open_win(buffer.bufnr, true, {
     relative = "editor",
-    width = column - 2,
+    width = column - 4,
     height = math.floor(vim.o.lines * 0.4),
     row = 2,
     col = column,
     anchor = "NW",
     focusable = true,
     external = false,
+    border = {{" ", "NormalFloat"}},
   })
+  vim.wo.number = false
+  vim.wo.signcolumn = "no"
   cursorlib.to_bottom(buffer.bufnr, window_id)
 
   Prompt.new(buffer, window_id):sync()
