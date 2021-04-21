@@ -1,6 +1,7 @@
-local M = {}
+local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
+local M = require("vusted.helper")
 
-M.root = require("flompt.lib.path").find_root()
+M.root = M.find_plugin_root(plugin_name)
 
 local prompt_name = "test_prompt"
 local prompt = ("[%s]"):format(prompt_name)
@@ -8,7 +9,7 @@ local prompt = ("[%s]"):format(prompt_name)
 vim.o.shell = "bash"
 vim.env.PS1 = prompt
 
-M.before_each = function()
+function M.before_each()
   vim.env.HISTFILE = ""
   M.test_data_path = "spec/test_data/" .. math.random(1, 2 ^ 30) .. "/"
   M.test_data_dir = M.root .. "/" .. M.test_data_path
@@ -17,28 +18,29 @@ M.before_each = function()
   vim.cmd("syntax enable")
 end
 
-M.after_each = function()
+function M.after_each()
   vim.cmd("tabedit")
   vim.cmd("tabonly!")
   vim.cmd("silent! %bwipeout!")
   vim.cmd("filetype off")
   vim.cmd("syntax off")
   vim.fn.delete(M.root .. "/spec/test_data", "rf")
+  M.cleanup_loaded_modules(plugin_name)
   print(" ")
 end
 
-M.input = function(texts)
+function M.input(texts)
   vim.api.nvim_put(texts, "c", true, true)
 end
 
-M.buffer_log = function()
+function M.buffer_log()
   local lines = vim.fn.getbufline("%", 1, "$")
   for _, line in ipairs(lines) do
     print(line)
   end
 end
 
-M.new_file = function(path, ...)
+function M.new_file(path, ...)
   local f = io.open(M.test_data_dir .. path, "w")
   for _, line in ipairs({...}) do
     f:write(line .. "\n")
@@ -46,20 +48,20 @@ M.new_file = function(path, ...)
   f:close()
 end
 
-M.new_directory = function(path)
+function M.new_directory(path)
   vim.fn.mkdir(M.test_data_dir .. path, "p")
 end
 
-M.delete = function(path)
+function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
-M.wait_terminal = function(_)
+function M.wait_terminal(_)
   -- HACK: How to wait terminal drawing?
   vim.cmd("sleep 300ms")
 end
 
-M.open_terminal_sync = function()
+function M.open_terminal_sync()
   local channel_id = vim.fn.termopen({"bash", "--noprofile", "--norc", "-eo", "pipefail"}, {
     on_stdout = function(_, data, _)
       local msg = "[stdout] " .. table.concat(data, "\n")
@@ -78,7 +80,7 @@ M.open_terminal_sync = function()
   return channel_id
 end
 
-M._search_last_prompt = function()
+function M._search_last_prompt()
   vim.cmd("normal! G")
   local result = vim.fn.search(prompt_name, "bW")
   if result == 0 then
@@ -88,7 +90,7 @@ M._search_last_prompt = function()
   return result
 end
 
-M.emit_text_changed = function()
+function M.emit_text_changed()
   vim.cmd(("doautocmd flompt:%s TextChanged"):format(vim.fn.bufnr("%")))
 end
 
