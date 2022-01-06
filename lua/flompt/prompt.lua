@@ -10,8 +10,8 @@ Prompt.__index = Prompt
 M.Prompt = Prompt
 
 function Prompt.new(buffer, window_id)
-  vim.validate({buffer = {buffer, "table"}, window_id = {window_id, "number"}})
-  local tbl = {_buffer = buffer, _window_id = window_id}
+  vim.validate({ buffer = { buffer, "table" }, window_id = { window_id, "number" } })
+  local tbl = { _buffer = buffer, _window_id = window_id }
   return setmetatable(tbl, Prompt)
 end
 
@@ -37,7 +37,7 @@ function Prompt.open()
     anchor = "NW",
     focusable = true,
     external = false,
-    border = {{" ", "NormalFloat"}},
+    border = { { " ", "NormalFloat" } },
   })
   vim.wo.number = false
   vim.wo.signcolumn = "no"
@@ -47,7 +47,7 @@ function Prompt.open()
 end
 
 function Prompt.get(bufnr)
-  vim.validate({bufnr = {bufnr, "number", true}})
+  vim.validate({ bufnr = { bufnr, "number", true } })
   local buffer = Buffer.find(bufnr)
   if buffer == nil then
     return

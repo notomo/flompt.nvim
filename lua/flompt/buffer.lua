@@ -12,9 +12,9 @@ local PATH_PREFIX = FILETYPE .. "://"
 
 function Buffer.new(bufnr, source_bufnr, source_cmd)
   vim.validate({
-    bufnr = {bufnr, "number"},
-    source_bufnr = {source_bufnr, "number"},
-    source_cmd = {source_cmd, "string"},
+    bufnr = { bufnr, "number" },
+    source_bufnr = { source_bufnr, "number" },
+    source_cmd = { source_cmd, "string" },
   })
 
   local new_line = ""
@@ -22,7 +22,7 @@ function Buffer.new(bufnr, source_bufnr, source_cmd)
     new_line = "\r"
   end
 
-  local tbl = {bufnr = bufnr, _source_bufnr = source_bufnr, _new_line = new_line}
+  local tbl = { bufnr = bufnr, _source_bufnr = source_bufnr, _new_line = new_line }
   return setmetatable(tbl, Buffer)
 end
 
@@ -38,7 +38,7 @@ function Buffer._find()
 end
 
 function Buffer.find(bufnr)
-  vim.validate({bufnr = {bufnr, "number", true}})
+  vim.validate({ bufnr = { bufnr, "number", true } })
   bufnr = bufnr or Buffer._find()
 
   if not bufnr or not vim.api.nvim_buf_is_valid(bufnr) then
@@ -74,23 +74,43 @@ function Buffer.create()
     history.load(bufnr)
   end
 
-  vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
+  vim.cmd(
+    ("autocmd BufWipeout <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr)
+  )
   vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
 
   local group_name = "flompt:" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
-  vim.cmd(("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
-  vim.cmd(("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
-  vim.cmd(("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(group_name, bufnr, bufnr))
+  vim.cmd(
+    ("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
+      group_name,
+      bufnr,
+      bufnr
+    )
+  )
+  vim.cmd(
+    ("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
+      group_name,
+      bufnr,
+      bufnr
+    )
+  )
+  vim.cmd(
+    ("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
+      group_name,
+      bufnr,
+      bufnr
+    )
+  )
   vim.cmd("augroup END")
 
   return Buffer.new(bufnr, source_bufnr, source_cmd), nil
 end
 
-local CTRL_U = vim.api.nvim_eval("\"\\<C-u>\"")
+local CTRL_U = vim.api.nvim_eval('"\\<C-u>"')
 
 function Buffer.send_line(self, row)
-  vim.validate({row = {row, "number"}})
+  vim.validate({ row = { row, "number" } })
   local line = {
     CTRL_U .. vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1],
     self._new_line,
@@ -99,8 +119,8 @@ function Buffer.send_line(self, row)
 end
 
 function Buffer.sync_line(self, row)
-  vim.validate({row = {row, "number"}})
-  local line = {CTRL_U .. vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1]}
+  vim.validate({ row = { row, "number" } })
+  local line = { CTRL_U .. vim.api.nvim_buf_get_lines(self.bufnr, row - 1, row, false)[1] }
   self:_send(line)
 end
 
@@ -110,7 +130,7 @@ function Buffer._send(self, line)
     return
   end
 
-  local running = vim.fn.jobwait({id}, 0)[1] == -1
+  local running = vim.fn.jobwait({ id }, 0)[1] == -1
   if not running then
     return
   end
@@ -119,7 +139,7 @@ function Buffer._send(self, line)
 end
 
 function Buffer.append(self)
-  vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, true, {""})
+  vim.api.nvim_buf_set_lines(self.bufnr, -1, -1, true, { "" })
 end
 
 function Buffer.length(self)

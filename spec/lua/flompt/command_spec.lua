@@ -2,7 +2,6 @@ local helper = require("flompt.lib.testlib.helper")
 local flompt = helper.require("flompt")
 
 describe("flompt", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -13,7 +12,7 @@ describe("flompt", function()
     flompt.open()
     assert.window_count(2)
 
-    helper.input({"echo 123"})
+    helper.input({ "echo 123" })
 
     local before_line = vim.fn.line(".")
     flompt.send()
@@ -56,11 +55,11 @@ describe("flompt", function()
 
     flompt.open()
 
-    helper.input({"exit"})
+    helper.input({ "exit" })
     flompt.send()
     helper.wait_terminal(channel_id)
 
-    helper.input({"echo 123"})
+    helper.input({ "echo 123" })
     flompt.send()
     helper.wait_terminal(channel_id)
   end)
@@ -72,7 +71,7 @@ describe("flompt", function()
 
     flompt.open()
 
-    helper.input({"exit"})
+    helper.input({ "exit" })
     flompt.send()
     helper.wait_terminal(channel_id)
 
@@ -85,7 +84,7 @@ describe("flompt", function()
 
     flompt.open()
 
-    helper.input({"echo 123"})
+    helper.input({ "echo 123" })
     helper.emit_text_changed()
     helper.wait_terminal(channel_id)
 
@@ -105,9 +104,12 @@ describe("flompt", function()
   end)
 
   it("can load bash history", function()
-    helper.new_file("test_history", [[
+    helper.new_file(
+      "test_history",
+      [[
 ls
-cat]])
+cat]]
+    )
     vim.env.HISTFILE = helper.test_data_path .. "test_history"
     local channel_id = helper.open_terminal_sync()
 

@@ -19,7 +19,7 @@ function M._has(name, exe)
 end
 
 function M._zsh(exe)
-  local path = vim.fn.systemlist({exe, "-i", "-c", "echo ${HISTFILE}"})[1]
+  local path = vim.fn.systemlist({ exe, "-i", "-c", "echo ${HISTFILE}" })[1]
   if path == nil then
     return
   end
@@ -36,7 +36,7 @@ function M._zsh(exe)
 end
 
 function M._bash(exe)
-  local path = vim.fn.systemlist({exe, "-c", "echo ${HISTFILE}"})[1]
+  local path = vim.fn.systemlist({ exe, "-c", "echo ${HISTFILE}" })[1]
   if path == nil then
     return
   end

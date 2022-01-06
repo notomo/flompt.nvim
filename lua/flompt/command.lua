@@ -8,7 +8,7 @@ Command.__index = Command
 M.Command = Command
 
 function Command.new(name, ...)
-  local args = {...}
+  local args = { ... }
   local f = function()
     return Command[name](unpack(args))
   end
@@ -42,7 +42,7 @@ function Command.close(bufnr)
 end
 
 function Command.sync(bufnr)
-  vim.validate({bufnr = {bufnr, "number"}})
+  vim.validate({ bufnr = { bufnr, "number" } })
   local prompt = Prompt.get(bufnr)
   if prompt == nil then
     return "state is not found"

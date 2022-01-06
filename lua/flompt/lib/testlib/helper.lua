@@ -42,7 +42,7 @@ end
 
 function M.new_file(path, ...)
   local f = io.open(M.test_data_dir .. path, "w")
-  for _, line in ipairs({...}) do
+  for _, line in ipairs({ ... }) do
     f:write(line .. "\n")
   end
   f:close()
@@ -62,7 +62,7 @@ function M.wait_terminal(_)
 end
 
 function M.open_terminal_sync()
-  local channel_id = vim.fn.termopen({"bash", "--noprofile", "--norc", "-eo", "pipefail"}, {
+  local channel_id = vim.fn.termopen({ "bash", "--noprofile", "--norc", "-eo", "pipefail" }, {
     on_stdout = function(_, data, _)
       local msg = "[stdout] " .. table.concat(data, "\n")
       vim.api.nvim_out_write(msg .. "\n")
