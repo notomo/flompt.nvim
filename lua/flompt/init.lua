@@ -1,17 +1,15 @@
-local Command = require("flompt.command").Command
-
 local M = {}
 
 function M.open()
-  Command.new("open")
+  require("flompt.command").open()
 end
 
 function M.send()
-  Command.new("send")
+  require("flompt.command").send()
 end
 
 function M.close()
-  Command.new("close")
+  require("flompt.command").close()
 end
 
 return M

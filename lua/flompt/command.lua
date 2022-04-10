@@ -1,31 +1,12 @@
+local ShowError = require("flompt.vendor.misclib.error_handler").for_show_error()
+
 local Prompt = require("flompt.prompt").Prompt
-local messagelib = require("flompt.lib.message")
 
-local M = {}
-
-local Command = {}
-Command.__index = Command
-M.Command = Command
-
-function Command.new(name, ...)
-  local args = { ... }
-  local f = function()
-    return Command[name](unpack(args))
-  end
-
-  local ok, msg = xpcall(f, debug.traceback)
-  if not ok then
-    return messagelib.error(msg)
-  elseif msg then
-    return messagelib.warn(msg)
-  end
-end
-
-function Command.open()
+function ShowError.open()
   return Prompt.open()
 end
 
-function Command.send()
+function ShowError.send()
   local prompt = Prompt.get()
   if prompt == nil then
     return "state is not found"
@@ -33,7 +14,7 @@ function Command.send()
   return prompt:send()
 end
 
-function Command.close(bufnr)
+function ShowError.close(bufnr)
   local prompt = Prompt.get(bufnr)
   if prompt == nil then
     return
@@ -41,7 +22,7 @@ function Command.close(bufnr)
   return prompt:close()
 end
 
-function Command.sync(bufnr)
+function ShowError.sync(bufnr)
   vim.validate({ bufnr = { bufnr, "number" } })
   local prompt = Prompt.get(bufnr)
   if prompt == nil then
@@ -50,4 +31,4 @@ function Command.sync(bufnr)
   return prompt:sync()
 end
 
-return M
+return ShowError:methods()

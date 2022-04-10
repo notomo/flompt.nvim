@@ -74,33 +74,19 @@ function Buffer.create()
     history.load(bufnr)
   end
 
-  vim.cmd(
-    ("autocmd BufWipeout <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr)
-  )
-  vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.command').Command.close(%s)"):format(source_bufnr, bufnr))
+  vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.command').close(%s)"):format(source_bufnr, bufnr))
+  vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.command').close(%s)"):format(source_bufnr, bufnr))
 
   local group_name = "flompt:" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
   vim.cmd(
-    ("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
-      group_name,
-      bufnr,
-      bufnr
-    )
+    ("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
   )
   vim.cmd(
-    ("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
-      group_name,
-      bufnr,
-      bufnr
-    )
+    ("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
   )
   vim.cmd(
-    ("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').Command.sync(%s)"):format(
-      group_name,
-      bufnr,
-      bufnr
-    )
+    ("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
   )
   vim.cmd("augroup END")
 
