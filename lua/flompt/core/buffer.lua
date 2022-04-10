@@ -1,4 +1,4 @@
-local history = require("flompt.history")
+local history = require("flompt.core.history")
 local vim = vim
 
 local M = {}

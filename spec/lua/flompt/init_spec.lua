@@ -1,4 +1,4 @@
-local helper = require("flompt.lib.testlib.helper")
+local helper = require("flompt.test.helper")
 local flompt = helper.require("flompt")
 
 describe("flompt", function()

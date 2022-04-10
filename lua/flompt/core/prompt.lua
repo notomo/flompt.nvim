@@ -1,4 +1,4 @@
-local Buffer = require("flompt.buffer").Buffer
+local Buffer = require("flompt.core.buffer").Buffer
 local windowlib = require("flompt.lib.window")
 local cursorlib = require("flompt.lib.cursor")
 local vim = vim

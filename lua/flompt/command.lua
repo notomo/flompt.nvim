@@ -1,6 +1,6 @@
 local ShowError = require("flompt.vendor.misclib.error_handler").for_show_error()
 
-local Prompt = require("flompt.prompt").Prompt
+local Prompt = require("flompt.core.prompt").Prompt
 
 function ShowError.open()
   return Prompt.open()
