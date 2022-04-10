@@ -1,11 +1,8 @@
 local history = require("flompt.core.history")
 local vim = vim
 
-local M = {}
-
 local Buffer = {}
 Buffer.__index = Buffer
-M.Buffer = Buffer
 
 local FILETYPE = "flompt"
 local PATH_PREFIX = FILETYPE .. "://"
@@ -132,4 +129,4 @@ function Buffer.length(self)
   return vim.api.nvim_buf_line_count(self.bufnr)
 end
 
-return M
+return Buffer

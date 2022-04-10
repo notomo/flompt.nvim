@@ -1,16 +1,16 @@
-local Buffer = require("flompt.core.buffer").Buffer
+local Buffer = require("flompt.core.buffer")
 local windowlib = require("flompt.lib.window")
 local cursorlib = require("flompt.lib.cursor")
 local vim = vim
 
-local M = {}
-
 local Prompt = {}
 Prompt.__index = Prompt
-M.Prompt = Prompt
 
 function Prompt.new(buffer, window_id)
-  vim.validate({ buffer = { buffer, "table" }, window_id = { window_id, "number" } })
+  vim.validate({
+    buffer = { buffer, "table" },
+    window_id = { window_id, "number" },
+  })
   local tbl = { _buffer = buffer, _window_id = window_id }
   return setmetatable(tbl, Prompt)
 end
@@ -49,8 +49,8 @@ end
 function Prompt.get(bufnr)
   vim.validate({ bufnr = { bufnr, "number", true } })
   local buffer = Buffer.find(bufnr)
-  if buffer == nil then
-    return
+  if not buffer then
+    return nil, "state is not found"
   end
 
   local window_id = vim.fn.win_findbuf(buffer.bufnr)[1]
@@ -79,4 +79,4 @@ function Prompt.enter(self)
   windowlib.enter(self._window_id)
 end
 
-return M
+return Prompt
