@@ -24,6 +24,7 @@ function M.after_each()
   vim.cmd("silent! %bwipeout!")
   vim.cmd("filetype off")
   vim.cmd("syntax off")
+  vim.cmd("messages clear")
   vim.fn.delete(M.root .. "/spec/test_data", "rf")
   M.cleanup_loaded_modules(plugin_name)
   print(" ")
@@ -56,13 +57,25 @@ function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
-function M.wait_terminal(_)
-  -- HACK: How to wait terminal drawing?
-  vim.cmd("sleep 300ms")
+function M.wait_terminal(pattern)
+  local bufnrs = vim.tbl_filter(function(bufnr)
+    return vim.bo[bufnr].buftype == "terminal"
+  end, vim.fn.tabpagebuflist())
+  local bufnr = bufnrs[1]
+  local ok = vim.wait(1000, function()
+    local result
+    vim.api.nvim_buf_call(bufnr, function()
+      result = vim.fn.search(pattern)
+    end)
+    return result ~= 0
+  end)
+  if not ok then
+    error("timeout: not found pattern: " .. pattern)
+  end
 end
 
 function M.open_terminal_sync()
-  local channel_id = vim.fn.termopen({ "bash", "--noprofile", "--norc", "-eo", "pipefail" }, {
+  vim.fn.termopen({ "bash", "--noprofile", "--norc", "-eo", "pipefail" }, {
     on_stdout = function(_, data, _)
       local msg = "[stdout] " .. table.concat(data, "\n")
       vim.api.nvim_out_write(msg .. "\n")
@@ -76,8 +89,7 @@ function M.open_terminal_sync()
       vim.api.nvim_out_write(msg .. "\n")
     end,
   })
-  M.wait_terminal(channel_id)
-  return channel_id
+  M.wait_terminal(prompt)
 end
 
 function M._search_last_prompt()
@@ -123,6 +135,21 @@ asserts.create("exists_pattern"):register(function(self)
     self:set_positive(("`%s` not found"):format(pattern))
     self:set_negative(("`%s` found"):format(pattern))
     return result ~= 0
+  end
+end)
+
+asserts.create("exists_message"):register(function(self)
+  return function(_, args)
+    local expected = args[1]
+    self:set_positive(("`%s` not found message"):format(expected))
+    self:set_negative(("`%s` found message"):format(expected))
+    local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
+    for _, msg in ipairs(messages) do
+      if msg:match(expected) then
+        return true
+      end
+    end
+    return false
   end
 end)
 

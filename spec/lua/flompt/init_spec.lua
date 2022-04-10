@@ -6,7 +6,7 @@ describe("flompt", function()
   after_each(helper.after_each)
 
   it("can open and send", function()
-    local channel_id = helper.open_terminal_sync()
+    helper.open_terminal_sync()
     helper.buffer_log()
 
     flompt.open()
@@ -16,7 +16,7 @@ describe("flompt", function()
 
     local before_line = vim.fn.line(".")
     flompt.send()
-    helper.wait_terminal(channel_id)
+    helper.wait_terminal([[\v^123$]])
     assert.line_number(before_line + 1)
 
     flompt.close()
@@ -51,42 +51,43 @@ describe("flompt", function()
   end)
 
   it("cannot send to already exited terminal", function()
-    local channel_id = helper.open_terminal_sync()
+    helper.open_terminal_sync()
 
     flompt.open()
 
     helper.input({ "exit" })
     flompt.send()
-    helper.wait_terminal(channel_id)
+    helper.wait_terminal("exit")
 
     helper.input({ "echo 123" })
     flompt.send()
-    helper.wait_terminal(channel_id)
+
+    assert.exists_message("state is not found")
   end)
 
   it("can exit with no error", function()
     vim.cmd("tabedit")
 
-    local channel_id = helper.open_terminal_sync()
+    helper.open_terminal_sync()
 
     flompt.open()
 
     helper.input({ "exit" })
     flompt.send()
-    helper.wait_terminal(channel_id)
+    helper.wait_terminal("^exit$")
 
     vim.cmd("wincmd p")
     vim.cmd("quit")
   end)
 
   it("can sync", function()
-    local channel_id = helper.open_terminal_sync()
+    helper.open_terminal_sync()
 
     flompt.open()
 
     helper.input({ "echo 123" })
     helper.emit_text_changed()
-    helper.wait_terminal(channel_id)
+    helper.wait_terminal("echo 123")
 
     helper.buffer_log()
     vim.cmd("wincmd p")
@@ -94,7 +95,7 @@ describe("flompt", function()
     vim.cmd("wincmd p")
 
     flompt.send()
-    helper.wait_terminal(channel_id)
+    helper.wait_terminal("^123$")
 
     flompt.close()
     helper.buffer_log()
@@ -111,10 +112,9 @@ ls
 cat]]
     )
     vim.env.HISTFILE = helper.test_data_path .. "test_history"
-    local channel_id = helper.open_terminal_sync()
+    helper.open_terminal_sync()
 
     flompt.open()
-    helper.wait_terminal(channel_id)
 
     assert.exists_pattern([[
 ls
