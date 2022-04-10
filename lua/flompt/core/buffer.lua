@@ -71,21 +71,22 @@ function Buffer.create()
     history.load(bufnr)
   end
 
-  vim.cmd(("autocmd BufWipeout <buffer=%s> lua require('flompt.command').close(%s)"):format(source_bufnr, bufnr))
-  vim.cmd(("autocmd TermClose <buffer=%s> lua require('flompt.command').close(%s)"):format(source_bufnr, bufnr))
+  vim.api.nvim_create_autocmd({ "BufWipeout", "TermClose" }, {
+    buffer = source_bufnr,
+    callback = function()
+      require("flompt.command").close(bufnr)
+    end,
+  })
 
   local group_name = "flompt:" .. bufnr
-  vim.cmd(("augroup %s"):format(group_name))
-  vim.cmd(
-    ("autocmd %s TextChanged <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
-  )
-  vim.cmd(
-    ("autocmd %s TextChangedI <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
-  )
-  vim.cmd(
-    ("autocmd %s TextChangedP <buffer=%s> lua require('flompt.command').sync(%s)"):format(group_name, bufnr, bufnr)
-  )
-  vim.cmd("augroup END")
+  vim.api.nvim_create_augroup(group_name, {})
+  vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "TextChangedP" }, {
+    group = group_name,
+    buffer = bufnr,
+    callback = function()
+      require("flompt.command").sync(bufnr)
+    end,
+  })
 
   return Buffer.new(bufnr, source_bufnr, source_cmd), nil
 end
