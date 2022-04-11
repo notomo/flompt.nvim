@@ -1,5 +1,5 @@
 local Buffer = require("flompt.core.buffer")
-local windowlib = require("flompt.lib.window")
+local windowlib = require("flompt.vendor.misclib.window")
 local cursorlib = require("flompt.lib.cursor")
 local vim = vim
 
@@ -72,11 +72,11 @@ function Prompt.sync(self)
 end
 
 function Prompt.close(self)
-  windowlib.close(self._window_id)
+  windowlib.safe_close(self._window_id)
 end
 
 function Prompt.enter(self)
-  windowlib.enter(self._window_id)
+  windowlib.safe_enter(self._window_id)
 end
 
 return Prompt
