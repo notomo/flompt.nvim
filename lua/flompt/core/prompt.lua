@@ -1,6 +1,6 @@
 local Buffer = require("flompt.core.buffer")
 local windowlib = require("flompt.vendor.misclib.window")
-local cursorlib = require("flompt.lib.cursor")
+local cursorlib = require("flompt.vendor.misclib.cursor")
 local vim = vim
 
 local Prompt = {}
@@ -41,7 +41,7 @@ function Prompt.open()
   })
   vim.wo.number = false
   vim.wo.signcolumn = "no"
-  cursorlib.to_bottom(buffer.bufnr, window_id)
+  cursorlib.to_bottom(window_id)
 
   Prompt.new(buffer, window_id):sync()
 end
@@ -62,7 +62,7 @@ function Prompt.send(self)
   self._buffer:send_line(row)
   if row == self._buffer:length() then
     self._buffer:append()
-    cursorlib.to_bottom(self._buffer.bufnr, self._window_id)
+    cursorlib.to_bottom(self._window_id)
   end
 end
 
