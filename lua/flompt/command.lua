@@ -1,9 +1,12 @@
 local ShowError = require("flompt.vendor.misclib.error_handler").for_show_error()
+local ReturnValue = require("flompt.vendor.misclib.error_handler").for_return_value()
 
 local Prompt = require("flompt.core.prompt")
 
-function ShowError.open()
-  return Prompt.open()
+function ReturnValue.open()
+  return Prompt.open():catch(function(e)
+    require("flompt.vendor.misclib.message").warn(e)
+  end)
 end
 
 function ShowError.send()
@@ -31,4 +34,4 @@ function ShowError.sync(bufnr)
   return prompt:sync()
 end
 
-return ShowError:methods()
+return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())

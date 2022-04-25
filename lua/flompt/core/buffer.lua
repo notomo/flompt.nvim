@@ -55,7 +55,7 @@ end
 
 function Buffer.create()
   if vim.bo.buftype ~= "terminal" then
-    return nil, "Not supported &buftype: " .. vim.bo.buftype
+    return require("flompt.vendor.promise").reject("Not supported &buftype: " .. vim.bo.buftype)
   end
 
   local source_cmd = vim.fn.expand("%:t")
@@ -63,12 +63,13 @@ function Buffer.create()
   local name = ("%s%d/%s"):format(PATH_PREFIX, source_bufnr, source_cmd)
   local pattern = ("^%s$"):format(name)
   local bufnr = vim.fn.bufnr(pattern)
+  local promise = require("flompt.vendor.promise").resolve()
   if bufnr == -1 then
     bufnr = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_name(bufnr, name)
     vim.bo[bufnr].filetype = FILETYPE
     vim.bo[bufnr].bufhidden = "wipe"
-    history.load(bufnr)
+    promise = history.load(bufnr)
   end
 
   vim.api.nvim_create_autocmd({ "BufWipeout", "TermClose" }, {
@@ -88,7 +89,9 @@ function Buffer.create()
     end,
   })
 
-  return Buffer.new(bufnr, source_bufnr, source_cmd), nil
+  return promise:next(function()
+    return Buffer.new(bufnr, source_bufnr, source_cmd)
+  end)
 end
 
 local CTRL_U = vim.api.nvim_eval('"\\<C-u>"')

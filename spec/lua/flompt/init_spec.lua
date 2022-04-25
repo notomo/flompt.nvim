@@ -9,7 +9,7 @@ describe("flompt", function()
     helper.open_terminal_sync()
     helper.buffer_log()
 
-    flompt.open()
+    helper.wait(flompt.open())
     assert.window_count(2)
 
     helper.input({ "echo 123" })
@@ -28,7 +28,7 @@ describe("flompt", function()
 
   it("can close", function()
     helper.open_terminal_sync()
-    flompt.open()
+    helper.wait(flompt.open())
 
     flompt.close()
     assert.window_count(1)
@@ -42,10 +42,10 @@ describe("flompt", function()
 
   it("does not open two prompt from the same window", function()
     helper.open_terminal_sync()
-    flompt.open()
+    helper.wait(flompt.open())
 
     vim.cmd("wincmd p")
-    flompt.open()
+    helper.wait(flompt.open())
 
     assert.window_count(2)
   end)
@@ -53,7 +53,7 @@ describe("flompt", function()
   it("cannot send to already exited terminal", function()
     helper.open_terminal_sync()
 
-    flompt.open()
+    helper.wait(flompt.open())
 
     helper.input({ "exit" })
     flompt.send()
@@ -70,7 +70,7 @@ describe("flompt", function()
 
     helper.open_terminal_sync()
 
-    flompt.open()
+    helper.wait(flompt.open())
 
     helper.input({ "exit" })
     flompt.send()
@@ -83,7 +83,7 @@ describe("flompt", function()
   it("can sync", function()
     helper.open_terminal_sync()
 
-    flompt.open()
+    helper.wait(flompt.open())
 
     helper.input({ "echo 123" })
     helper.emit_text_changed()
@@ -114,11 +114,21 @@ cat]]
     vim.env.HISTFILE = helper.test_data_path .. "test_history"
     helper.open_terminal_sync()
 
-    flompt.open()
+    helper.wait(flompt.open())
 
     assert.exists_pattern([[
 ls
 cat
 ]])
+  end)
+
+  it("raises error if history file is not found", function()
+    local history_file = helper.test_data_path .. "invalid"
+    vim.env.HISTFILE = history_file
+    helper.open_terminal_sync()
+
+    helper.wait(flompt.open())
+
+    assert.exists_message("cannot open: " .. history_file)
   end)
 end)

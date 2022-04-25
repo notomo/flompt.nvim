@@ -92,6 +92,32 @@ function M.open_terminal_sync()
   M.wait_terminal(prompt)
 end
 
+function M.on_finished()
+  local finished = false
+  return setmetatable({
+    wait = function()
+      local ok = vim.wait(1000, function()
+        return finished
+      end, 10, false)
+      if not ok then
+        error("wait timeout")
+      end
+    end,
+  }, {
+    __call = function()
+      finished = true
+    end,
+  })
+end
+
+function M.wait(promise)
+  local on_finished = M.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
+end
+
 function M._search_last_prompt()
   vim.cmd("normal! G")
   local result = vim.fn.search(prompt_name, "bW")

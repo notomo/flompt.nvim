@@ -18,32 +18,31 @@ end
 function Prompt.open()
   local prompt = Prompt.get()
   if prompt ~= nil then
-    return prompt:enter()
+    prompt:enter()
+    return require("flompt.vendor.promise").resolve()
   end
 
-  local buffer, err = Buffer.create()
-  if err ~= nil then
-    return err
-  end
+  local promise = Buffer.create()
   cursorlib.to_bottom()
+  return promise:next(function(buffer)
+    local column = math.floor(vim.o.columns / 2)
+    local window_id = vim.api.nvim_open_win(buffer.bufnr, true, {
+      relative = "editor",
+      width = column - 4,
+      height = math.floor(vim.o.lines * 0.4),
+      row = 2,
+      col = column,
+      anchor = "NW",
+      focusable = true,
+      external = false,
+      border = { { " ", "NormalFloat" } },
+    })
+    vim.wo[window_id].number = false
+    vim.wo[window_id].signcolumn = "no"
+    cursorlib.to_bottom(window_id)
 
-  local column = math.floor(vim.o.columns / 2)
-  local window_id = vim.api.nvim_open_win(buffer.bufnr, true, {
-    relative = "editor",
-    width = column - 4,
-    height = math.floor(vim.o.lines * 0.4),
-    row = 2,
-    col = column,
-    anchor = "NW",
-    focusable = true,
-    external = false,
-    border = { { " ", "NormalFloat" } },
-  })
-  vim.wo.number = false
-  vim.wo.signcolumn = "no"
-  cursorlib.to_bottom(window_id)
-
-  Prompt.new(buffer, window_id):sync()
+    Prompt.new(buffer, window_id):sync()
+  end)
 end
 
 function Prompt.get(bufnr)

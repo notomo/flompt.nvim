@@ -1,7 +1,7 @@
 local M = {}
 
 function M.open()
-  require("flompt.command").open()
+  return require("flompt.command").open()
 end
 
 function M.send()
