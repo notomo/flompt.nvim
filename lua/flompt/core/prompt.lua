@@ -22,21 +22,25 @@ function Prompt.open()
     return require("flompt.vendor.promise").resolve()
   end
 
+  local current_window_id = vim.api.nvim_get_current_win()
   local promise = Buffer.create()
-  cursorlib.to_bottom()
+  cursorlib.to_bottom(current_window_id)
   return promise:next(function(buffer)
     local column = math.floor(vim.o.columns / 2)
-    local window_id = vim.api.nvim_open_win(buffer.bufnr, true, {
-      relative = "editor",
-      width = column - 4,
-      height = math.floor(vim.o.lines * 0.4),
-      row = 2,
-      col = column,
-      anchor = "NW",
-      focusable = true,
-      external = false,
-      border = { { " ", "NormalFloat" } },
-    })
+    local window_id = vim.api.nvim_win_call(current_window_id, function()
+      return vim.api.nvim_open_win(buffer.bufnr, true, {
+        relative = "editor",
+        width = column - 4,
+        height = math.floor(vim.o.lines * 0.4),
+        row = 2,
+        col = column,
+        anchor = "NW",
+        focusable = true,
+        external = false,
+        border = { { " ", "NormalFloat" } },
+      })
+    end)
+    vim.api.nvim_set_current_win(window_id)
     vim.wo[window_id].number = false
     vim.wo[window_id].signcolumn = "no"
     cursorlib.to_bottom(window_id)
