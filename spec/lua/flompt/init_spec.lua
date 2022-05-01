@@ -105,13 +105,13 @@ describe("flompt", function()
   end)
 
   it("can load bash history", function()
-    helper.new_file(
+    helper.test_data:create_file(
       "test_history",
       [[
 ls
 cat]]
     )
-    vim.env.HISTFILE = helper.test_data_path .. "test_history"
+    vim.env.HISTFILE = helper.test_data.full_path .. "test_history"
     helper.open_terminal_sync()
 
     helper.wait(flompt.open())
@@ -123,7 +123,7 @@ cat
   end)
 
   it("raises error if history file is not found", function()
-    local history_file = helper.test_data_path .. "invalid"
+    local history_file = helper.test_data.full_path .. "invalid"
     vim.env.HISTFILE = history_file
     helper.open_terminal_sync()
 
