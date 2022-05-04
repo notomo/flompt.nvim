@@ -1,29 +1,23 @@
 local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
 local helper = require("vusted.helper")
+helper.cleanup()
 
 helper.root = helper.find_plugin_root(plugin_name)
 
 local prompt_name = "test_prompt"
 local prompt = ("[%s]"):format(prompt_name)
 
-vim.o.shell = "bash"
 vim.env.PS1 = prompt
 
 function helper.before_each()
+  vim.o.shell = "bash"
   vim.env.HISTFILE = ""
   helper.test_data = require("flompt.vendor.misclib.test.data_dir").setup(helper.root)
-  vim.cmd("filetype on")
-  vim.cmd("syntax enable")
 end
 
 function helper.after_each()
-  vim.cmd("tabedit")
-  vim.cmd("tabonly!")
-  vim.cmd("silent! %bwipeout!")
-  vim.cmd("filetype off")
-  vim.cmd("syntax off")
-  vim.cmd("messages clear")
   helper.test_data:teardown()
+  helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
   print(" ")
 end
