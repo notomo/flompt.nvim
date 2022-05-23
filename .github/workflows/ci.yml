@@ -3,27 +3,7 @@ on: [push, pull_request]
 
 jobs:
   test:
-    name: Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        # FIXME: bash exits as soon as executing termopen(['bash']) on windows github actions
-        # os: [ubuntu-latest, macos-latest, windows-latest]
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: notomo/action-setup-nvim-lua@v1
-      - run: luarocks install vusted
-
-      - uses: rhysd/action-setup-vim@v1
-        id: vim
-        with:
-          neovim: true
-          version: nightly
-
-      - name: Run tests
-        shell: bash
-        env:
-          VUSTED_NVIM: ${{ steps.vim.outputs.executable }}
-        run: make test
+    uses: notomo/workflow/.github/workflows/neovim-plugin-ci.yml@main
+    with:
+      # FIXME: bash exits as soon as executing termopen(['bash']) on windows github actions
+      test_os: '["ubuntu-latest", "macos-latest"]'
