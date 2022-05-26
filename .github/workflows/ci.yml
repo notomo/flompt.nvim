@@ -2,7 +2,7 @@ name: ci
 on: [push, pull_request]
 
 jobs:
-  test:
+  ci:
     uses: notomo/workflow/.github/workflows/neovim-plugin-ci.yml@main
     with:
       # FIXME: bash exits as soon as executing termopen(['bash']) on windows github actions
