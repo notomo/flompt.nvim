@@ -49,6 +49,8 @@ function Prompt.open()
   end)
 end
 
+--- @return table: prompt
+--- @return string|nil: error
 function Prompt.get(bufnr)
   vim.validate({ bufnr = { bufnr, "number", true } })
   local buffer = Buffer.find(bufnr)
