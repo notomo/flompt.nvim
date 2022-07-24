@@ -95,7 +95,7 @@ function helper.wait(promise)
 end
 
 function helper._search_last_prompt()
-  vim.cmd("normal! G")
+  vim.cmd.normal({ args = { "G" }, bang = true })
   local result = vim.fn.search(prompt_name, "bW")
   if result == 0 then
     local msg = ("not found prompt: %s"):format(prompt_name)
@@ -105,7 +105,10 @@ function helper._search_last_prompt()
 end
 
 function helper.emit_text_changed()
-  vim.cmd(("doautocmd flompt:%s TextChanged"):format(vim.fn.bufnr("%")))
+  vim.api.nvim_exec_autocmds("TextChanged", {
+    group = "flompt:" .. vim.fn.bufnr("%"),
+    modeline = false,
+  })
 end
 
 local asserts = require("vusted.assert").asserts
@@ -121,7 +124,7 @@ end)
 
 asserts.create("command_result_line"):register_eq(function()
   helper._search_last_prompt()
-  vim.cmd("normal! k")
+  vim.cmd.normal({ args = { "k" }, bang = true })
   return vim.fn.getline(".")
 end)
 

@@ -44,7 +44,7 @@ describe("flompt", function()
     helper.open_terminal_sync()
     helper.wait(flompt.open())
 
-    vim.cmd("wincmd p")
+    vim.cmd.wincmd("p")
     helper.wait(flompt.open())
 
     assert.window_count(2)
@@ -66,7 +66,7 @@ describe("flompt", function()
   end)
 
   it("can exit with no error", function()
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
 
     helper.open_terminal_sync()
 
@@ -76,8 +76,8 @@ describe("flompt", function()
     flompt.send()
     helper.wait_terminal("^exit$")
 
-    vim.cmd("wincmd p")
-    vim.cmd("quit")
+    vim.cmd.wincmd("p")
+    vim.cmd.quit()
   end)
 
   it("can sync", function()
@@ -90,9 +90,9 @@ describe("flompt", function()
     helper.wait_terminal("echo 123")
 
     helper.buffer_log()
-    vim.cmd("wincmd p")
+    vim.cmd.wincmd("p")
     assert.prompt("echo 123")
-    vim.cmd("wincmd p")
+    vim.cmd.wincmd("p")
 
     flompt.send()
     helper.wait_terminal("^123$")
