@@ -17,7 +17,7 @@ describe("flompt", function()
     local before_line = vim.fn.line(".")
     flompt.send()
     helper.wait_terminal([[\v^123$]])
-    assert.line_number(before_line + 1)
+    assert.cursor_row(before_line + 1)
 
     flompt.close()
     helper.buffer_log()

@@ -112,10 +112,8 @@ function helper.emit_text_changed()
 end
 
 local asserts = require("vusted.assert").asserts
-
-asserts.create("window_count"):register_eq(function()
-  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
-end)
+local asserters = require(plugin_name .. ".vendor.assertlib").list()
+require(plugin_name .. ".vendor.misclib.test.assert").register(asserts.create, asserters)
 
 asserts.create("prompt"):register_eq(function()
   helper._search_last_prompt()
@@ -126,36 +124,6 @@ asserts.create("command_result_line"):register_eq(function()
   helper._search_last_prompt()
   vim.cmd.normal({ args = { "k" }, bang = true })
   return vim.fn.getline(".")
-end)
-
-asserts.create("line_number"):register_eq(function()
-  return vim.fn.line(".")
-end)
-
-asserts.create("exists_pattern"):register(function(self)
-  return function(_, args)
-    local pattern = args[1]
-    pattern = pattern:gsub("\n", "\\n")
-    local result = vim.fn.search(pattern, "n")
-    self:set_positive(("`%s` not found"):format(pattern))
-    self:set_negative(("`%s` found"):format(pattern))
-    return result ~= 0
-  end
-end)
-
-asserts.create("exists_message"):register(function(self)
-  return function(_, args)
-    local expected = args[1]
-    self:set_positive(("`%s` not found message"):format(expected))
-    self:set_negative(("`%s` found message"):format(expected))
-    local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
-    for _, msg in ipairs(messages) do
-      if msg:match(expected) then
-        return true
-      end
-    end
-    return false
-  end
 end)
 
 return helper
